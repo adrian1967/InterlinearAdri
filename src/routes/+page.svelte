@@ -212,6 +212,39 @@ theos: {
   </div>
 </div>
 
+<!-- Ligne grecque 3 -->
+<div class="line">
+  <div class="word-block" on:click={() => select("kai")}>
+    <div class="greek">καὶ</div>
+    <div class="pron">kai</div>
+    <div class="trans">and (also, even)</div>
+  </div>
+
+  <div class="word-block" on:click={() => select("theos")}>
+    <div class="greek">Θεὸς</div>
+    <div class="pron">theos</div>
+    <div class="trans">God (divine)</div>
+  </div>
+
+  <div class="word-block" on:click={() => select("enVerb")}>
+    <div class="greek">ἦν</div>
+    <div class="pron">ēn</div>
+    <div class="trans">was (existing)</div>
+  </div>
+
+  <div class="word-block" on:click={() => select("ho")}>
+    <div class="greek">ὁ</div>
+    <div class="pron">ho</div>
+    <div class="trans">the</div>
+  </div>
+
+  <div class="word-block" on:click={() => select("logos")}>
+    <div class="greek">Λόγος</div>
+    <div class="pron">logos</div>
+    <div class="trans">Word (reason, discourse)</div>
+  </div>
+</div>
+
 <!-- Fiche lexicale -->
 {#if selectedWord}
   <div class="lexicon">
