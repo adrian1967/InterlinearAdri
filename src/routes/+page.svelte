@@ -11,7 +11,6 @@
   // "read" | "chapters" | "verses"
   let view = "read";
 
-
   // -----------------------------
   // LEXIQUE (version courte)
   // -----------------------------
@@ -196,6 +195,8 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
   // -----------------------------
 // VERSES (contenu par verset)
 // -----------------------------
+
+
 const VERSE_DATA = {
   John: {
     1: {
