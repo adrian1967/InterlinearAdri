@@ -11,6 +11,7 @@
   // "read" | "chapters" | "verses"
   let view = "read";
 
+
   // -----------------------------
   // LEXIQUE (version courte)
   // -----------------------------
@@ -192,6 +193,63 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
     }
   };
 
+  // -----------------------------
+// VERSES (contenu par verset)
+// -----------------------------
+const VERSE_DATA = {
+  John: {
+    1: {
+      1: [
+        // Ligne 1
+        [
+          { key: "en", trans: "In", greek: "Ἐν", pron: "en" },
+          { dim: true, trans: "[the]" },
+          { key: "arche", trans: "beginning", greek: "ἀρχῇ", pron: "archē" },
+          { key: "eimi", trans: "was", greek: "ἦν", pron: "ēn" },
+          { key: "ho", trans: "the", greek: "ὁ", pron: "ho" }
+        ],
+        // Ligne 2
+        [
+          { key: "logos", trans: "Word", greek: "Λόγος", pron: "logos" },
+          { key: "kai", trans: "and", greek: "καὶ", pron: "kai" },
+          { key: "ho", trans: "the", greek: "ὁ", pron: "ho" },
+          { key: "logos", trans: "Word", greek: "Λόγος", pron: "logos" },
+          { key: "eimi", trans: "was", greek: "ἦν", pron: "ēn" }
+        ],
+        // Ligne 3
+        [
+          { key: "pros", trans: "with", greek: "πρὸς", pron: "pros" },
+          { key: "ho", trans: "the", greek: "τὸν", pron: "ton" },
+          { key: "theos", trans: "God", greek: "Θεόν", pron: "theon" },
+          { key: "kai", trans: "and", greek: "καὶ", pron: "kai" },
+          { key: "theos", trans: "God", greek: "Θεὸς", pron: "theos" }
+        ],
+        // Ligne 4
+        [
+          { key: "eimi", trans: "was", greek: "ἦν", pron: "ēn" },
+          { key: "ho", trans: "the", greek: "ὁ", pron: "ho" },
+          { key: "logos", trans: "Word", greek: "Λόγος", pron: "logos" }
+        ]
+      ],
+
+      // Pour tester: on met un verset 7 "placeholder" (tu pourras le remplir après)
+      7: [
+        [
+          { key: "houtos", trans: "He", greek: "Οὗτος", pron: "houtos" },
+          { key: "erchomai", trans: "came", greek: "ἦλθεν", pron: "ēlthen" },
+          { key: "eis", trans: "for", greek: "εἰς", pron: "eis" },
+          { dim: true, trans: "[a]" },
+          { key: "martyria", trans: "witness", greek: "μαρτυρίαν", pron: "marturian" }
+        ]
+      ]
+    }
+  }
+};
+
+// verset courant (tableau de lignes)
+$: currentVerseLines =
+  VERSE_DATA?.[currentBook]?.[currentChapter]?.[currentVerseNum] ?? null;
+
   $: verseTitle = `${currentBook} ${currentChapter}:${currentVerseNum}`;
 
   // -----------------------------
@@ -253,28 +311,6 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
     <button class="cancel" on:click={cancelPicker}>CANCEL</button>
   </div>
 
-{:else if view === "verses"}
-  <!-- PICKER VERSETS -->
-  <div class="picker">
-    <div class="tabs">
-      <div class="tab" on:click={openChapterPicker}>CHAPTER</div>
-      <div class="tab active">VERSE</div>
-    </div>
-
-    <div class="grid">
-      {#each Array(CHAPTERS[currentBook][currentChapter]) as _, i}
-        <button
-          class:selected={(i + 1) === currentVerseNum}
-          on:click={() => pickVerse(i + 1)}
-        >
-          {i + 1}
-        </button>
-      {/each}
-    </div>
-
-    <button class="cancel" on:click={cancelPicker}>CANCEL</button>
-  </div>
-
 
 {:else}
   <!-- MODE LECTURE -->
@@ -288,12 +324,12 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
         on:click={() => select("en")}
         on:keydown={(e) => (e.key === "Enter" || e.key === " ") && select("en")}
       >
-        <div class="trans">in (within)</div>
+        <div class="trans">In</div>
         <div class="greek">Ἐν</div>
         <div class="pron">en</div>
       </div>
 
-      <div class="word-block dim">
+      <div class="word-block">
         <div class="trans">[the]</div>
         <div class="greek"></div>
         <div class="pron"></div>
@@ -408,7 +444,7 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
         on:click={() => select("pros")}
         on:keydown={(e) => (e.key === "Enter" || e.key === " ") && select("pros")}
       >
-        <div class="trans">toward/with</div>
+        <div class="trans">with</div>
         <div class="greek">πρὸς</div>
         <div class="pron">pros</div>
       </div>
@@ -503,6 +539,9 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
   </div>
 {/if}
 
+
+
+
 {#if selectedWord}
   <div
     class="lexicon-overlay"
@@ -550,14 +589,17 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
 
   /* Lecture */
   .read {
-    margin-top: 0.5rem;
+  margin-top: 0.5rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
   }
 
   .line {
     display: flex;
     gap: 12px;
     margin-bottom: 1rem;
-    justify-content: center;
+    justify-content: flex-start;
     flex-wrap: wrap;
   }
 
@@ -574,21 +616,21 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
     cursor: default;
   }
 .trans {
-  font-size: 1.8rem;      /* EN grand */
+  font-size: 1.2rem;
+  font-weight: 500;
   color: #111;
-  line-height: 1.05;
+  text-align: center;
 }
 
 .greek {
-  font-size: 1.15rem;     /* grec plus petit */
+  font-size: 1.6rem;
   font-family: "Times New Roman", serif;
-  margin-top: 2px;
+  font-weight: 500;
 }
 
 .pron {
-  font-size: 0.95rem;     /* pron encore plus petit */
-  color: #666;
-  margin-top: 1px;
+  font-size: 0.8rem;
+  color: #777;
 }
 
   /* Picker style (Hagios-ish) */
@@ -703,5 +745,33 @@ ${selectedWord.translatedAs ?? selectedWord.translatedAsCount ?? ""}
 
 .lex-label { font-weight: 700; }
 .lex-value { font-weight: 400; }
+
+/* === OVERRIDE HIÉRARCHIE (English > Greek > Pron) === */
+.read .word-block .trans{
+  font-size: 1.8rem !important;
+  font-weight: 600 !important;
+  color: #111 !important;
+  line-height: 1.05 !important;
+  margin-bottom: 0.15rem !important;
+}
+
+.read .word-block .greek{
+  font-size: 1.65rem !important;
+  font-weight: 500 !important;
+  color: #111 !important;
+  line-height: 1.05 !important;
+  margin-bottom: 0.05rem !important;
+}
+
+.read .word-block .pron{
+  font-size: 1.3rem !important;
+  color: #666 !important;
+  line-height: 1 !important;
+}
+
+/* un peu plus de “bloc” pour que ça respire bien */
+.read .word-block{
+  min-width: 120px !important;
+}
 
 </style>
