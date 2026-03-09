@@ -1,11 +1,17 @@
-<script>
-	import favicon from '$lib/assets/favicon.svg';
 
-	let { children } = $props();
+<script>
+  import { onMount } from 'svelte';
+
+  onMount(async () => {
+    if (typeof window !== 'undefined') {
+      const { registerSW } = await import('virtual:pwa-register');
+      registerSW({ immediate: true });
+    }
+  });
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+  <link rel="icon" href="/favicon.ico" />
 </svelte:head>
 
-{@render children()}
+<slot />
