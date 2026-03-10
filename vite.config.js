@@ -6,10 +6,12 @@ import { VitePWA } from 'vite-plugin-pwa';
 const base = '/InterlinearAdri/';
 
 export default defineConfig({
+  base,
   plugins: [
     sveltekit(),
 
     VitePWA({
+      base,
       registerType: 'autoUpdate',
       includeAssets: [
         'favicon.ico',
