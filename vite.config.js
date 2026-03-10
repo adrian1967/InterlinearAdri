@@ -1,8 +1,9 @@
 
-
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+
+const base = '/InterlinearAdri/';
 
 export default defineConfig({
   plugins: [
@@ -20,8 +21,8 @@ export default defineConfig({
         name: 'InterlinearAdri',
         short_name: 'InterlinearAdri',
         description: 'Interactive Greek interlinear New Testament with lexicon.',
-        start_url: '/',
-        scope: '/',
+        start_url: base,
+        scope: base,
         display: 'standalone',
         display_override: ['standalone', 'minimal-ui'],
         orientation: 'any',
@@ -29,17 +30,17 @@ export default defineConfig({
         theme_color: '#ffffff',
         icons: [
           {
-            src: '/pwa-192.png',
+            src: `${base}pwa-192.png`,
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/pwa-512.png',
+            src: `${base}pwa-512.png`,
             sizes: '512x512',
             type: 'image/png'
           },
           {
-            src: '/pwa-512.png',
+            src: `${base}pwa-512.png`,
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
@@ -47,8 +48,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        // cache des fichiers générés par build (JS/CSS/etc.)
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+        navigateFallback: `${base}404.html`
       }
     })
   ]
