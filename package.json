@@ -17,5 +17,9 @@
 		"svelte": "^5.45.6",
 		"vite": "^7.2.6",
 		"vite-plugin-pwa": "^1.2.0"
+	},
+	"dependencies": {
+		"@capacitor/cli": "^8.2.0",
+		"@capacitor/core": "^8.2.0"
 	}
 }
