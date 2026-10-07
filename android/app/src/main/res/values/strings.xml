@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">InterlinearAdri</string>
+    <string name="title_activity_main">InterlinearAdri</string>
+    <string name="package_name">com.adrian.interlinearadri</string>
+    <string name="custom_url_scheme">com.adrian.interlinearadri</string>
+</resources>

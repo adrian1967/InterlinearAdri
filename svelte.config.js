@@ -8,7 +8,7 @@ const config = {
       fallback: 'index.html'
     }),
     paths: {
-      base: process.argv.includes('dev') ? '' : '/InterlinearAdri'
+      base: '',
     }
   }
 };
