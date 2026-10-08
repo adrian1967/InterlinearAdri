@@ -8,6 +8,29 @@
   let currentChapter = 1;
   let currentVerseNum = 1;
 
+  import { onMount } from "svelte";
+onMount(() => {
+  const saved = localStorage.getItem("interlinearAdri-reading-position");
+
+  if (saved) {
+    try {
+      const position = JSON.parse(saved);
+      if (position.book === "John" &&
+          Number.isInteger(position.chapter) &&
+          Number.isInteger(position.verse) &&
+          position.chapter >= 1 &&
+          position.chapter <= 21 &&
+          position.verse >= 1 &&
+          position.verse <= 36) {
+        currentBook = position.book;
+        currentChapter = position.chapter;
+        currentVerseNum = position.verse;
+      }
+    } catch (error) {
+      console.warn("Position de lecture invalide", error);
+    }
+  }
+});
   // "read" | "chapters" | "verses"
   let view = "read";
 
@@ -803,6 +826,14 @@ $: currentVerseLines =
     currentVerseNum = v;
     view = "read";
     selectedWord = null;
+    localStorage.setItem(
+  "interlinearAdri-reading-position",
+  JSON.stringify({
+    book: currentBook,
+    chapter: currentChapter,
+    verse: currentVerseNum
+  })
+);
   }
 
   function cancelPicker() {
