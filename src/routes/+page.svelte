@@ -836,6 +836,14 @@ $: currentVerseLines =
 );
   }
 
+function changeVerse(direction) {
+  const nextVerse = currentVerseNum + direction;
+
+  if (nextVerse >= 1 && nextVerse <= maxVerses) {
+    pickVerse(nextVerse);
+  }
+}
+
   function cancelPicker() {
     view = "read";
     selectedWord = null;
@@ -844,13 +852,38 @@ $: currentVerseLines =
 
 <!-- TITRE (cliquable) -->
 
-<button
-  type="button"
-  class="verse-title"
-  on:click={openChapterPicker}
->
-  {verseTitle}
-</button>
+
+<div style="display: flex; align-items: center; justify-content: center; gap: 16px;">
+  <button
+    type="button"
+    on:click={() => changeVerse(-1)}
+    disabled={currentVerseNum <= 1}
+    aria-label="Previous verse"
+    style="font-size: 28px; min-width: 48px; min-height: 48px; cursor: pointer;"
+
+  >
+    ◀
+  </button>
+
+  <button
+    type="button"
+    class="verse-title"
+    on:click={openChapterPicker}
+  >
+    {verseTitle}
+  </button>
+
+  <button
+    type="button"
+    on:click={() => changeVerse(1)}
+    disabled={currentVerseNum >= maxVerses}
+    aria-label="Next verse"
+    style="font-size: 28px; min-width: 48px; min-height: 48px; cursor: pointer;"
+
+  >
+    ▶
+  </button>
+</div>
 
 
 {#if view === "chapters"}
