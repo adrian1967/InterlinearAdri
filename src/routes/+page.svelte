@@ -3,6 +3,7 @@
   // ETAT GLOBAL
   // -----------------------------
   let selectedWord = null;
+  let screen = "home"; // "home" | "read"
 
   let currentBook = "John";
   let currentChapter = 1;
@@ -850,7 +851,29 @@ function changeVerse(direction) {
   }
 </script>
 
-<!-- TITRE (cliquable) -->
+{#if screen === "home"}
+  <main style="max-width: 800px; margin: 40px auto; padding: 24px; text-align: center;">
+    <h1>GREAT BOOKS</h1>
+    <h2>Through the Original Texts</h2>
+    <p><em>Discover the Sources. Explore the Ideas.</em></p>
+    <div style="display: grid; gap: 12px; margin-top: 36px; text-align: left;">
+  {#each [
+    ["Antiquity", "Homer, Plato, Aristotle"],
+    ["The New Testament", "A central work in our exploration"],
+    ["Late Antiquity & Middle Ages", "Augustine, Aquinas and other authors"],
+    ["Renaissance & Early Modern", "Humanism, philosophy and science"],
+    ["Modern & Contemporary", "18th–20th centuries and beyond"]
+  ] as category}
+    <div style="background: #f0f0f0; padding: 18px; border-radius: 12px;">
+      <strong>{category[0]}</strong>
+      <div style="font-size: 14px; color: #666; margin-top: 5px;">
+        {category[1]}
+      </div>
+    </div>
+  {/each}
+</div>
+  </main>
+{:else}<!-- TITRE (cliquable) -->
 
 
 <div style="display: flex; align-items: center; justify-content: center; gap: 16px;">
@@ -1035,7 +1058,7 @@ function changeVerse(direction) {
     </div>
   </div>
 {/if}
-
+{/if}
 <style>
   .verse-title {
     font-family: "Times New Roman", serif;
