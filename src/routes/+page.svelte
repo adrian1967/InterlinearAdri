@@ -852,7 +852,7 @@ function changeVerse(direction) {
 </script>
 
 {#if screen === "home"}
-  <main style="max-width: 800px; margin: 40px auto; padding: 24px; text-align: center;">
+  <main style="max-width: 400px; margin: 40px auto; padding: 24px; text-align: center;">
     <h1>GREAT BOOKS</h1>
     <h2>Through the Original Texts</h2>
     <p><em>Discover the Sources. Explore the Ideas.</em></p>
@@ -863,10 +863,10 @@ function changeVerse(direction) {
     ["Late Antiquity & Middle Ages", "Augustine, Aquinas and other authors"],
     ["Renaissance & Early Modern", "Humanism, philosophy and science"],
     ["Modern & Contemporary", "18th–20th centuries and beyond"]
-  ] as category}
-    <div style="background: #f0f0f0; padding: 18px; border-radius: 12px;">
-      <strong>{category[0]}</strong>
-      <div style="font-size: 14px; color: #666; margin-top: 5px;">
+  ] as category, categoryIndex}
+    <div style="background: #f0f0f0; padding: 24px; border-radius: 12px;">
+      <span style="font-size: 26px; margin-right: 14px;">{["🏛️", "📖", "📜", "📚", "🌍"][categoryIndex]}</span><strong style="font-size: 20px;">{category[0]}</strong><span style="float: right; color: #666;font-size: 30px;">❯</span>
+      <div style="font-size: 14px; color: #666; margin-top: 5px; margin-left: 50px;">
         {category[1]}
       </div>
     </div>
