@@ -3,7 +3,7 @@
   // ETAT GLOBAL
   // -----------------------------
   let selectedWord = null;
-  let screen = "home"; // "home" | "read"
+  let screen = "home"; // "home" | "gospels" | "read"
 
   let currentBook = "John";
   let currentChapter = 1;
@@ -877,22 +877,29 @@ function changeVerse(direction) {
 
 <button
   type="button"
-  on:click={() => { if (categoryIndex === 1) screen = "read"; }}
+  on:click={() => { if (categoryIndex === 1) screen = "gospels"; }}
   style="display: block; width: 100%; text-align: left; font: inherit; color: inherit; border: 0; background: #f0f0f0; padding: 24px; border-radius: 12px; cursor: pointer;"
 >
   <span style="font-size: 26px; margin-right: 14px;">{["🏛️", "📖", "📜", "📚", "🌍"][categoryIndex]}</span><strong style="font-size: 20px;">{category[0]}</strong><span style="float: right; color: #666; font-size: 30px;">❯</span>
   <span style="display: block; font-size: 14px; color: #666; margin-top: 5px; margin-left: 50px;">
     {category[1]}
-  </span>
 </button>
 
 
   {/each}
 </div>
   </main>
-{:else}<!-- TITRE (cliquable) -->
+{:else if screen === "gospels"}
+  <main style="max-width: 400px; margin: 40px auto; padding: 24px; text-align: center;">
+  <button type="button" on:click={() => screen = "home"} style="font-size: 18px; padding: 12px 20px; margin-bottom: 20px; border-radius: 12px; cursor: pointer;">← Back</button>
+    <h1>The Four Gospels</h1>
+    <button type="button" on:click={() => screen = "read"} style="font-size: 20px; padding: 16px 32px; margin-top: 24px; border-radius: 12px; cursor: pointer;">📖 John →</button>
+  </main>
+{:else}
+  <!-- TITRE (cliquable) -->
 
 <button type="button" on:click={() => screen = "home"} style="font-size: 22px; padding: 14px 24px; border-radius: 12px; cursor: pointer; margin-left: 40px">🏠 Home</button>
+<button type="button" on:click={() => screen = "gospels"} style="font-size: 18px; padding: 12px 20px;display: block; margin-top: 12px; margin-left: 40px; border-radius: 12px; cursor: pointer;">← Back</button>
 <div style="display: flex; align-items: center; justify-content: center; gap: 16px;">
   <button
     type="button"
