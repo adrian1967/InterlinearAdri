@@ -881,8 +881,10 @@ function changeVerse(direction) {
   style="display: block; width: 100%; text-align: left; font: inherit; color: inherit; border: 0; background: #f0f0f0; padding: 24px; border-radius: 12px; cursor: pointer;"
 >
   <span style="font-size: 26px; margin-right: 14px;">{["🏛️", "📖", "📜", "📚", "🌍"][categoryIndex]}</span><strong style="font-size: 20px;">{category[0]}</strong><span style="float: right; color: #666; font-size: 30px;">❯</span>
-  <span style="display: block; font-size: 14px; color: #666; margin-top: 5px; margin-left: 50px;">
+  
+    <span style="display: block; font-size: 14px; color: #666; margin-top: 5px; margin-left: 50px;">
     {category[1]}
+  </span>
 </button>
 
 
