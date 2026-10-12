@@ -856,6 +856,16 @@ function changeVerse(direction) {
     <h1>GREAT BOOKS</h1>
     <h2>Through the Original Texts</h2>
     <p><em>Discover the Sources. Explore the Ideas.</em></p>
+    <button
+  type="button"
+  on:click={() => screen = "read"}
+  style="font-size: 18px; padding: 14px 24px; margin-top: 24px; border-radius: 12px; cursor: pointer;"
+>
+  📖 Continue Reading
+  <div style="font-size: 13px; color: #666; margin-top: 5px;">
+    {verseTitle}
+  </div>
+</button>
     <div style="display: grid; gap: 12px; margin-top: 36px; text-align: left;">
   {#each [
     ["Antiquity", "Homer, Plato, Aristotle"],
@@ -864,8 +874,8 @@ function changeVerse(direction) {
     ["Renaissance & Early Modern", "Humanism, philosophy and science"],
     ["Modern & Contemporary", "18th–20th centuries and beyond"]
   ] as category, categoryIndex}
-    <div style="background: #f0f0f0; padding: 24px; border-radius: 12px;">
-      <span style="font-size: 26px; margin-right: 14px;">{["🏛️", "📖", "📜", "📚", "🌍"][categoryIndex]}</span><strong style="font-size: 20px;">{category[0]}</strong><span style="float: right; color: #666;font-size: 30px;">❯</span>
+            <div on:click={() => { if (categoryIndex === 1) screen = "read"; }} style="background: #f0f0f0; padding: 24px; border-radius: 12px;">
+    <span style="font-size: 26px; margin-right: 14px;">{["🏛️", "📖", "📜", "📚", "🌍"][categoryIndex]}</span><strong style="font-size: 20px;">{category[0]}</strong><span style="float: right; color: #666; font-size: 30px;">❯</span>
       <div style="font-size: 14px; color: #666; margin-top: 5px; margin-left: 50px;">
         {category[1]}
       </div>
@@ -875,7 +885,7 @@ function changeVerse(direction) {
   </main>
 {:else}<!-- TITRE (cliquable) -->
 
-
+<button type="button" on:click={() => screen = "home"} style="font-size: 22px; padding: 14px 24px; border-radius: 12px; cursor: pointer; margin-left: 40px">🏠 Home</button>
 <div style="display: flex; align-items: center; justify-content: center; gap: 16px;">
   <button
     type="button"
