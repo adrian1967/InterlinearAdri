@@ -3,13 +3,42 @@
   // ETAT GLOBAL
   // -----------------------------
   let selectedWord = null;
-  let screen = "home"; // "home" | "gospels" | "read"
+  let screen = "home"; // "home" | "gospels" | "chapters" | "read"
+  let selectedDocument = null;
+  const documents = [
+  {
+    title: "Diplomatic Transcription",
+    content: extractDiplomaticLines(diplomaticText)
+  },
+  {
+    title: "Interlinear Reading",
+    content: interlinearText
+  },
+  {
+    title: "General Conventions",
+    content: conventionsText
+  }
+];
+
+function extractDiplomaticLines(text) {
+  const lines = text.split(/\r?\n/);
+  const start = lines.findIndex(line =>
+    /^\s*1\.\s*[Α-Ωα-ω]/u.test(line)
+  );
+
+  if (start === -1) return text;
+
+  return lines.slice(start, start + 42).join("\n");
+}
 
   let currentBook = "John";
   let currentChapter = 1;
   let currentVerseNum = 1;
 
   import { onMount } from "svelte";
+  import diplomaticText from "$lib/manuscripts/john-column-001.md?raw";
+import interlinearText from "$lib/manuscripts/john-column-001-interlinear.md?raw";
+import conventionsText from "$lib/manuscripts/conventions.md?raw";
 onMount(() => {
   const saved = localStorage.getItem("interlinearAdri-reading-position");
 
@@ -619,6 +648,20 @@ $: verseNums = Array.from({ length: maxVerses }, (_, i) => i + 1);
 // -----------------------------
 // VERSES (contenu par verset)
 // -----------------------------
+
+const FLUENT_TRANSLATIONS = {
+  John: {
+    1: {
+      1: "In the beginning was the Logos, and the Logos was with God, and the Logos was God.",
+      2: "He was in the beginning with God.",
+      3: "All things came into being through him, and without him not even one thing came into being.",
+      4: "What came into being in him was life, and this life was the light.",
+      5: "And the light shines in the darkness, and the darkness did not grasp it."
+    }
+  }
+};
+
+
 const VERSE_DATA = {
   John: {
 
@@ -627,41 +670,107 @@ const VERSE_DATA = {
     // =========================
     1: {
 
-      1: [
-        // Ligne 1
-        [
-          { key: "en", trans: "In", greek: "Ἐν", pron: "en" },
-          { dim: true, trans: "[the]" },
-          { key: "arche", trans: "beginning", greek: "ἀρχῇ", pron: "archē" },
-          { key: "eimi", trans: "was", greek: "ἦν", pron: "ēn" },
-          { key: "ho", trans: "the", greek: "ὁ", pron: "ho" }
-        ],
+      
+1: [
+  // Jean 1:1
+  [
+    { key: "en", trans: "in", greek: "ΕΝ", pron: "en" },
+    { key: "arche", trans: "beginning", greek: "ΑΡΧΗ", pron: "archè" },
+    { key: "eimi", trans: "was", greek: "ΗΝ", pron: "èn" },
+    { key: "ho", trans: "the", greek: "Ο", pron: "o" },
+    { key: "logos", trans: "Logos", greek: "ΛΟΓΟC", pron: "logos" },
+    { key: "kai", trans: "and", greek: "ΚΑΙ", pron: "kai" },
+    { key: "ho", trans: "the", greek: "Ο", pron: "o" },
+    { key: "logos", trans: "Logos", greek: "ΛΟΓΟC", pron: "logos" }
+  ],
+  [
+    { key: "eimi", trans: "was", greek: "ΗΝ", pron: "èn" },
+    { key: "pros", trans: "with", greek: "ΠΡΟC", pron: "pros" },
+    { key: "ton", trans: "the", greek: "ΤΟΝ", pron: "ton" },
+    { key: "theos", trans: "God", greek: "Θ̅Ν̅", pron: "téon" },
+    { key: "kai", trans: "and", greek: "ΚΑΙ", pron: "kai" },
+    { key: "theos", trans: "God", greek: "Θ̅C̅", pron: "téos" },
+    { key: "eimi", trans: "was", greek: "ΗΝ", pron: "èn" },
+    { key: "ho", trans: "the", greek: "Ο", pron: "o" },
+    { key: "logos", trans: "Logos", greek: "ΛΟΓΟC", pron: "logos" }
+  ]
+],
 
-        // Ligne 2
-        [
-          { key: "logos", trans: "Word", greek: "Λόγος", pron: "logos" },
-          { key: "kai", trans: "and", greek: "καὶ", pron: "kai" },
-          { key: "ho", trans: "the", greek: "ὁ", pron: "ho" },
-          { key: "logos", trans: "Word", greek: "Λόγος", pron: "logos" },
-          { key: "eimi", trans: "was", greek: "ἦν", pron: "ēn" }
-        ],
+2: [
+  // Jean 1:2
+  [
+    { key: "houtos", trans: "He", greek: "ΟΥΤΟC", pron: "outos" },
+    { key: "eimi", trans: "was", greek: "ΗΝ", pron: "èn" },
+    { key: "en", trans: "in", greek: "ΕΝ", pron: "en" },
+    { key: "arche", trans: "beginning", greek: "ΑΡΧΗ", pron: "archè" },
+    { key: "pros", trans: "with", greek: "ΠΡΟC", pron: "pros" },
+    { key: "ton", trans: "the", greek: "ΤΟΝ", pron: "ton" },
+    { key: "theos", trans: "God", greek: "Θ̅Ν̅", pron: "téon" }
+  ]
+],
 
-        // Ligne 3
-        [
-          { key: "pros", trans: "with", greek: "πρὸς", pron: "pros" },
-          { key: "ton", trans: "—", greek: "τὸν", pron: "ton" },
-          { key: "theos", trans: "God", greek: "Θεόν", pron: "theon" },
-          { key: "kai", trans: "and", greek: "καὶ", pron: "kai" },
-          { key: "theos", trans: "God", greek: "Θεὸς", pron: "theos" }
-        ],
+3: [
+  // Jean 1:3
+  [
+    { key: "pas", trans: "all things", greek: "ΠΑΝΤΑ", pron: "panta" },
+    { key: "dia", trans: "through", greek: "ΔΙ’", pron: "di" },
+    { key: "autos", trans: "him", greek: "ΑΥΤΟΥ", pron: "autou" },
+    { key: "ginomai", trans: "came to be", greek: "ΕΓΕΝΕΤΟ", pron: "egeneto" },
+    { key: "kai", trans: "and", greek: "ΚΑΙ", pron: "kai" }
+  ],
+  [
+    { key: "choris", trans: "without", greek: "ΧωΡΙC", pron: "choris" },
+    { key: "autos", trans: "him", greek: "ΑΥΤΟΥ", pron: "autou" },
+    { key: "ginomai", trans: "came to be", greek: "ΕΓΕΝΕΤΟ", pron: "egeneto" },
+    { key: "oude", trans: "not even", greek: "ΟΥΔΕ", pron: "oude" },
+    { key: "heis", trans: "one", greek: "ΕΝ", pron: "hen" }
+  ]
+],
 
-        // Ligne 4
-        [
-          { key: "eimi", trans: "was", greek: "ἦν", pron: "ēn" },
-          { key: "ho", trans: "the", greek: "ὁ", pron: "ho" },
-          { key: "logos", trans: "Word", greek: "Λόγος", pron: "logos" }
-        ]
-      ],
+4: [
+  // Jean 1:4
+  [
+    { key: "ho", trans: "what", greek: "Ο", pron: "ho" },
+    { key: "ginomai", trans: "has come to be", greek: "ΓΕΓΟΝΕ", pron: "gegone" },
+    { key: "en", trans: "in", greek: "ΕΝ", pron: "en" },
+    { key: "autos", trans: "him", greek: "ΑΥΤω", pron: "auto" },
+    { key: "zoe", trans: "life", greek: "ΖωΗ", pron: "zoè" },
+    { key: "eimi", trans: "was", greek: "ΗΝ", pron: "èn" }
+  ],
+  [
+    { key: "kai", trans: "and", greek: "ΚΑΙ", pron: "kai" },
+    { key: "ho", trans: "the", greek: "Η", pron: "è" },
+    { key: "zoe", trans: "life", greek: "ΖωΗ", pron: "zoè" },
+    { key: "eimi", trans: "was", greek: "ΗΝ", pron: "èn" },
+    { key: "ho", trans: "the", greek: "ΤΟ", pron: "to" },
+    { key: "phos", trans: "light", greek: "ΦωC", pron: "fos" }
+  ]
+],
+
+
+5: [
+  // Jean 1:5 — Première proposition
+  [
+    { key: "kai", trans: "and", greek: "ΚΑΙ", pron: "kai" },
+    { key: "ho", trans: "the", greek: "ΤΟ", pron: "to" },
+    { key: "phos", trans: "light", greek: "ΦωC", pron: "fos" },
+    { key: "en", trans: "in", greek: "ΕΝ", pron: "en" },
+    { key: "ho", trans: "the", greek: "ΤΗ", pron: "tè" },
+    { key: "skotia", trans: "darkness", greek: "CΚΟΤΙΑ", pron: "skotia" },
+    { key: "phaino", trans: "shines", greek: "ΦΑΙΝΕΙ", pron: "fainei" }
+  ],
+
+  // Jean 1:5 — Deuxième proposition
+  [
+    { key: "kai", trans: "and", greek: "ΚΑΙ", pron: "kai" },
+    { key: "ho", trans: "the", greek: "Η", pron: "è" },
+    { key: "skotia", trans: "darkness", greek: "CΚΟΤΙΑ", pron: "skotia" },
+    { key: "autos", trans: "it", greek: "ΑΥΤΟ", pron: "auto" },
+    { key: "ou", trans: "not", greek: "ΟΥ", pron: "ou" },
+    { key: "katalambano", trans: "grasped", greek: "ΚΑΤΕΛΑΒΕΝ", pron: "katelaben" }
+  ]
+],
+
 
       7: [
         [
@@ -895,13 +1004,51 @@ function changeVerse(direction) {
   <main style="max-width: 400px; margin: 40px auto; padding: 24px; text-align: center;">
   <button type="button" on:click={() => screen = "home"} style="font-size: 18px; padding: 12px 20px; margin-bottom: 20px; border-radius: 12px; cursor: pointer;">← Back</button>
     <h1>The Four Gospels</h1>
-    <button type="button" on:click={() => screen = "read"} style="font-size: 20px; padding: 16px 32px; margin-top: 24px; border-radius: 12px; cursor: pointer;">📖 John →</button>
+    <button type="button" on:click={() => screen = "chapters"} style="font-size: 20px; padding: 16px 32px; margin-top: 24px; border-radius: 12px; cursor: pointer;">📖 John →</button>
+  </main>
+  {:else if screen === "chapters"}
+  <main style="max-width: 600px; margin: 40px auto; padding: 24px; text-align: center;">
+    <button
+      type="button"
+      on:click={() => (screen = "gospels")}
+    >
+      ← Back
+    </button>
+
+
+    <button
+      type="button"
+      on:click={() => {
+        currentChapter = 1;
+        currentVerseNum = 1;
+        screen = "read";
+      }}
+      style="display: block; width: 100%; margin-top: 32px; padding: 20px; cursor: pointer;"
+    >
+      <strong>CHAPTER 1 — The Logos, Life and Light</strong>
+      <div style="font-size: 14px; color: #666; margin-top: 8px;">
+        Additional reference: John 1:1–5
+      </div>
+    </button>
+    <button
+  type="button"
+  disabled
+  style="display: block; width: 100%; margin-top: 16px; padding: 20px; opacity: 0.55; cursor: not-allowed;"
+>
+  <strong>CHAPTER 2 — The Witness</strong>
+  <div style="font-size: 14px; color: #666; margin-top: 8px;">
+    Additional reference: John 1:6–9
+  </div>
+  <div style="font-size: 12px; margin-top: 6px;">
+    Coming soon
+  </div>
+</button>
   </main>
 {:else}
   <!-- TITRE (cliquable) -->
 
 <button type="button" on:click={() => screen = "home"} style="font-size: 22px; padding: 14px 24px; border-radius: 12px; cursor: pointer; margin-left: 40px">🏠 Home</button>
-<button type="button" on:click={() => screen = "gospels"} style="font-size: 18px; padding: 12px 20px;display: block; margin-top: 12px; margin-left: 40px; border-radius: 12px; cursor: pointer;">← Back</button>
+<button type="button" on:click={() => screen = "chapters"} style="font-size: 18px; padding: 12px 20px;display: block; margin-top: 12px; margin-left: 40px; border-radius: 12px; cursor: pointer;">← Back</button>
 <div style="display: flex; align-items: center; justify-content: center; gap: 16px;">
   <button
     type="button"
@@ -1014,9 +1161,9 @@ function changeVerse(direction) {
             disabled={!getLexKey(w)}
             on:click={() => selectWord(w)}
           >
-            <div class="trans">{w.trans ?? ""}</div>
             <div class="greek">{w.greek ?? ""}</div>
             <div class="pron">{w.pron ?? ""}</div>
+            <div class="trans">{w.trans ?? ""}</div>
           </button>
         {/each}
       </div>
@@ -1030,6 +1177,20 @@ function changeVerse(direction) {
         (choisis un autre verset, ou on l’ajoute)
       </p>
     {/if}
+    {#if FLUENT_TRANSLATIONS[currentBook]?.[currentChapter]?.[currentVerseNum]}
+  <p style="font-size: 24px; line-height: 1.5; margin: 28px 0; text-align: center;">
+    {FLUENT_TRANSLATIONS[currentBook][currentChapter][currentVerseNum]}
+  </p>
+{/if}
+    <div style="text-align: center; margin-top: 24px;">
+  <button
+    type="button"
+    on:click={() => (selectedDocument = documents[0])}
+    style="padding: 8px 16px; font-size: 14px; cursor: pointer;"
+  >
+    Manuscript
+  </button>
+</div>
   </div>
 {/if}
 
@@ -1085,6 +1246,20 @@ function changeVerse(direction) {
   </div>
 {/if}
 {/if}
+
+{#if selectedDocument}
+  <div class="lexicon-overlay" role="presentation">
+    <div class="lexicon-card" role="dialog" aria-modal="true" aria-label="Manuscript document">
+      <button on:click={() => (selectedDocument = null)}>
+        Close ✕
+      </button>
+
+      <h2>{selectedDocument.title}</h2>
+      <pre style="white-space: pre-wrap; overflow-wrap: anywhere;">{selectedDocument.content}</pre>
+    </div>
+  </div>
+{/if}
+
 <style>
   .verse-title {
     font-family: "Times New Roman", serif;
