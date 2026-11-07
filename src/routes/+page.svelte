@@ -2,6 +2,9 @@
   // -----------------------------
   // ETAT GLOBAL
   // -----------------------------
+
+import vaticanus1353 from '$lib/assets/vaticanus/Vaticanus_1353.jpg';
+
   let selectedWord = null;
   let screen = "home"; // "home" | "gospels" | "chapters" | "read"
   let selectedDocument = null;
@@ -31,6 +34,22 @@ function extractDiplomaticLines(text) {
   return lines.slice(start, start + 42).join("\n");
 }
 
+function extractDiplomaticNotes(text) {
+  const start = text.indexOf("Annotations marginales");
+
+  if (start === -1) {
+    return "No manuscript notes available.";
+  }
+
+  const end = text.indexOf("Statut du document", start);
+
+  return text.slice(
+    start,
+    end === -1 ? undefined : end
+  ).trim();
+}
+
+  let showManuscriptNotes = false;
   let currentBook = "John";
   let currentChapter = 1;
   let currentVerseNum = 1;
@@ -642,7 +661,7 @@ $: chapterNums = Object.keys(CHAPTERS?.[currentBook] ?? {})
 $: maxVerses = CHAPTERS?.[currentBook]?.[currentChapter] ?? 0;
 
 // Liste des versets (ex: [1..51] si chapitre 1)
-$: verseNums = Array.from({ length: maxVerses }, (_, i) => i + 1);
+$: verseNums = Array.from({ length: currentBook === "John" && currentChapter === 1 ? 5 : maxVerses }, (_, i) => i + 1);
 
 
 // -----------------------------
@@ -949,7 +968,7 @@ $: currentVerseLines =
 function changeVerse(direction) {
   const nextVerse = currentVerseNum + direction;
 
-  if (nextVerse >= 1 && nextVerse <= maxVerses) {
+  if (nextVerse >= 1 && nextVerse <= 5) {
     pickVerse(nextVerse);
   }
 }
@@ -1002,18 +1021,35 @@ function changeVerse(direction) {
   </main>
 {:else if screen === "gospels"}
   <main style="max-width: 400px; margin: 40px auto; padding: 24px; text-align: center;">
+
+<button
+  type="button"
+  on:click={() => (screen = "home")}
+  style="font-size: 22px; padding: 14px 24px; display: block; margin: 0 auto 16px; border-radius: 12px; cursor: pointer;"
+>
+  🏠 Home
+</button>
+
   <button type="button" on:click={() => screen = "home"} style="font-size: 18px; padding: 12px 20px; margin-bottom: 20px; border-radius: 12px; cursor: pointer;">← Back</button>
     <h1>The Four Gospels</h1>
     <button type="button" on:click={() => screen = "chapters"} style="font-size: 20px; padding: 16px 32px; margin-top: 24px; border-radius: 12px; cursor: pointer;">📖 John →</button>
   </main>
   {:else if screen === "chapters"}
   <main style="max-width: 600px; margin: 40px auto; padding: 24px; text-align: center;">
+<button
+  type="button"
+  on:click={() => (screen = "home")}
+  style="font-size: 22px; padding: 14px 24px; display: block; margin: 0 auto 16px; border-radius: 12px; cursor: pointer;"
+>
+  🏠 Home
+</button>
     <button
-      type="button"
-      on:click={() => (screen = "gospels")}
-    >
-      ← Back
-    </button>
+  type="button"
+  on:click={() => (screen = "gospels")}
+  style="font-size: 18px; padding: 12px 20px; margin-bottom: 20px; border-radius: 12px; cursor: pointer;"
+>
+  ← Back
+</button>
 
 
     <button
@@ -1025,7 +1061,12 @@ function changeVerse(direction) {
       }}
       style="display: block; width: 100%; margin-top: 32px; padding: 20px; cursor: pointer;"
     >
-      <strong>CHAPTER 1 — The Logos, Life and Light</strong>
+      <div style="font-size: 14px; color: #666; margin-bottom: 6px;">
+     CHAPTER 1
+    </div>
+    <div style="font-family: Georgia, serif; font-size: 26px; font-weight: bold;">
+     The Logos, Life and Light
+     </div>
       <div style="font-size: 14px; color: #666; margin-top: 8px;">
         Additional reference: John 1:1–5
       </div>
@@ -1035,7 +1076,13 @@ function changeVerse(direction) {
   disabled
   style="display: block; width: 100%; margin-top: 16px; padding: 20px; opacity: 0.55; cursor: not-allowed;"
 >
-  <strong>CHAPTER 2 — The Witness</strong>
+  <div style="font-size: 14px; color: #666; margin-bottom: 6px;">
+  CHAPTER 2
+</div>
+<div style="font-family: Georgia, serif; font-size: 26px; font-weight: bold;">
+  The Witness
+</div>
+  
   <div style="font-size: 14px; color: #666; margin-top: 8px;">
     Additional reference: John 1:6–9
   </div>
@@ -1064,7 +1111,7 @@ function changeVerse(direction) {
   <button
     type="button"
     class="verse-title"
-    on:click={openChapterPicker}
+    on:click={openVersePicker}
   >
     {verseTitle}
   </button>
@@ -1072,7 +1119,7 @@ function changeVerse(direction) {
   <button
     type="button"
     on:click={() => changeVerse(1)}
-    disabled={currentVerseNum >= maxVerses}
+    disabled={currentVerseNum >= 5}
     aria-label="Next verse"
     style="font-size: 28px; min-width: 48px; min-height: 48px; cursor: pointer;"
 
@@ -1117,14 +1164,6 @@ function changeVerse(direction) {
   <!-- PICKER VERSETS -->
   <div class="picker">
     <div class="tabs">
-
-      <button
-       type="button"
-       class="tab"
-       on:click={openChapterPicker}
-       >
-        CHAPTER
-       </button>
 
 
 
@@ -1255,12 +1294,44 @@ function changeVerse(direction) {
       </button>
 
       <h2>{selectedDocument.title}</h2>
-      <pre style="white-space: pre-wrap; overflow-wrap: anywhere;">{selectedDocument.content}</pre>
+
+      {#if selectedDocument.title === "Diplomatic Transcription"}
+
+    <div class="manuscript-workspace">
+       <div class="manuscript-panel">
+
+    <img
+      src={vaticanus1353}
+      alt="Codex Vaticanus — page complète, début de l'Évangile selon Jean dans la troisième colonne"
+      style="width: 100%; height: auto;"
+    />
+
+</div>
+
+<div class="transcription-panel">
+  <pre style="white-space: pre-wrap; overflow-wrap: anywhere; margin: 0;">{selectedDocument.content}</pre>
+</div>
+
+<div class="notes-panel">
+  <h3>Manuscript Notes</h3>
+
+  <pre style="white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit;">
+    {extractDiplomaticNotes(diplomaticText)}
+  </pre>
+</div>
+
+</div>
+
+{:else}
+  <pre style="white-space: pre-wrap; overflow-wrap: anywhere;">{selectedDocument.content}</pre>
+{/if}
+
     </div>
   </div>
 {/if}
 
 <style>
+
   .verse-title {
     font-family: "Times New Roman", serif;
     font-size: 3rem;
@@ -1270,11 +1341,14 @@ function changeVerse(direction) {
   }
 
   /* Lecture */
-  
-  .read {
+
+.read {
   margin-top: 0.5rem;
+  width: 100%;
   max-width: 900px;
-  margin-left: 40px;   /* aligne vers la gauche */
+  margin-left: 0;
+  padding-inline: clamp(12px, 3vw, 40px);
+  box-sizing: border-box;
 }
 
   .line {
@@ -1464,6 +1538,62 @@ function changeVerse(direction) {
   margin: 0;
   font: inherit;
   text-align: inherit;
+}
+
+/* Great Books — adaptation aux écrans étroits */
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .verse-title {
+    font-size: clamp(1.8rem, 7vw, 2.5rem);
+  }
+    .read .word-block .greek {
+    font-size: 1.4rem !important;
+  }
+
+  .read .word-block .pron {
+    font-size: 1.05rem !important;
+  }
+
+  .read .word-block .trans {
+    font-size: 1.5rem !important;
+  }
+    .read .word-block {
+    min-width: 0 !important;
+  }
+}
+/* Great Books — Manuscript Workspace */
+
+.manuscript-workspace {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+  justify-items: center;
+}
+
+@media (min-width: 800px) {
+  .manuscript-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .notes-panel {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Great Books — panneau de transcription diplomatique */
+
+.transcription-panel {
+  width: 100%;
+  min-width: 0;
+  max-height: 65vh;
+  overflow: auto;
+  box-sizing: border-box;
 }
 
 </style>
