@@ -1,0 +1,34 @@
+{
+  "language": "Português",
+  "navigation": {
+    "home": "Início",
+    "back": "Voltar",
+    "continueReading": "Continuar a leitura",
+    "newTestament": "O Novo Testamento",
+    "newTestamentDescription": "Uma obra central na nossa exploração",
+    "antiquity": "Antiguidade",
+"antiquityDescription": "Homero, Platão, Aristóteles",
+"lateAntiquity": "Antiguidade Tardia e Idade Média",
+"lateAntiquityDescription": "Agostinho, Tomás de Aquino e outros autores",
+"renaissance": "Renascimento e Início da Idade Moderna",
+"renaissanceDescription": "Humanismo, filosofia e ciência",
+"modern": "Era Moderna e Contemporânea",
+"modernDescription": "Séculos XVIII a XX e posteriores",
+"subtitle": "Através dos Textos Originais",
+"motto": "Descubra as fontes. Explore as ideias.",
+"newTestamentTitle": "O Novo Testamento",
+"fourGospels": "Os quatro Evangelhos",
+"chapters": "Capítulos",
+"john": "João",
+"chapter": "CAPÍTULO",
+"chapter1Title": "O Logos, a vida e a luz",
+"chapter2Title": "O Testemunho",
+"additionalReference": "Referência adicional",
+"comingSoon": "Em breve"
+  },
+  "manuscript": {
+    "title": "Manuscrito original",
+    "transcription": "Transcrição diplomática",
+    "notes": "Notas do manuscrito"
+  }
+}

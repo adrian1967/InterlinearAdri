@@ -54,11 +54,21 @@ function extractDiplomaticNotes(text) {
   let currentChapter = 1;
   let currentVerseNum = 1;
 
+  import { translate } from '$lib/i18n';
   import { onMount } from "svelte";
   import diplomaticText from "$lib/manuscripts/john-column-001.md?raw";
-import interlinearText from "$lib/manuscripts/john-column-001-interlinear.md?raw";
-import conventionsText from "$lib/manuscripts/conventions.md?raw";
-onMount(() => {
+  import interlinearText from "$lib/manuscripts/john-column-001-interlinear.md?raw";
+  import conventionsText from "$lib/manuscripts/conventions.md?raw";
+  let currentLanguage = 'fr';
+  const languageOptions = [
+  { code: 'en', name: 'English' },
+  { code: 'fr', name: 'Français' },
+  { code: 'pt', name: 'Português' }
+];
+  onMount(() => {
+  const savedLanguage = localStorage.getItem("interlinearAdri-language");
+  if (['en', 'fr', 'pt'].includes(savedLanguage)) currentLanguage = savedLanguage;
+
   const saved = localStorage.getItem("interlinearAdri-reading-position");
 
   if (saved) {
@@ -929,7 +939,7 @@ const VERSE_DATA = {
 $: currentVerseLines =
   VERSE_DATA?.[currentBook]?.[currentChapter]?.[currentVerseNum] ?? null;
 
-  $: verseTitle = `${currentBook} ${currentChapter}:${currentVerseNum}`;
+  $: verseTitle = `${currentBook === 'John' ? translate(currentLanguage, 'navigation.john') : currentBook} ${currentChapter}:${currentVerseNum}`;
 
   // -----------------------------
   // NAV (mode "page remplace tout")
@@ -981,26 +991,41 @@ function changeVerse(direction) {
 
 {#if screen === "home"}
   <main style="max-width: 400px; margin: 40px auto; padding: 24px; text-align: center;">
+  <div style="text-align: right; margin-bottom: 20px;">
+  <select
+    aria-label="Select language"
+    bind:value={currentLanguage}
+    on:change={() => localStorage.setItem("interlinearAdri-language", currentLanguage)}
+    style="font-size: 16px; padding: 8px; border-radius: 8px;"
+  >
+    {#each languageOptions as language}
+      <option value={language.code}>{language.name}</option>
+    {/each}
+  </select>
+</div>
     <h1>GREAT BOOKS</h1>
-    <h2>Through the Original Texts</h2>
-    <p><em>Discover the Sources. Explore the Ideas.</em></p>
+<h2>{translate(currentLanguage, 'navigation.subtitle')}</h2>
+<p><em>{translate(currentLanguage, 'navigation.motto')}</em></p>
     <button
   type="button"
   on:click={() => screen = "read"}
   style="font-size: 18px; padding: 14px 24px; margin-top: 24px; border-radius: 12px; cursor: pointer;"
 >
-  📖 Continue Reading
+  📖 {translate(currentLanguage, 'navigation.continueReading')}
   <div style="font-size: 13px; color: #666; margin-top: 5px;">
     {verseTitle}
   </div>
 </button>
     <div style="display: grid; gap: 12px; margin-top: 36px; text-align: left;">
   {#each [
-    ["Antiquity", "Homer, Plato, Aristotle"],
-    ["The New Testament", "A central work in our exploration"],
-    ["Late Antiquity & Middle Ages", "Augustine, Aquinas and other authors"],
-    ["Renaissance & Early Modern", "Humanism, philosophy and science"],
-    ["Modern & Contemporary", "18th–20th centuries and beyond"]
+
+[translate(currentLanguage, 'navigation.antiquity'), translate(currentLanguage, 'navigation.antiquityDescription')],
+[translate(currentLanguage, 'navigation.newTestament'), translate(currentLanguage, 'navigation.newTestamentDescription')],
+[translate(currentLanguage, 'navigation.lateAntiquity'), translate(currentLanguage, 'navigation.lateAntiquityDescription')],
+[translate(currentLanguage, 'navigation.renaissance'), translate(currentLanguage, 'navigation.renaissanceDescription')],
+[translate(currentLanguage, 'navigation.modern'), translate(currentLanguage, 'navigation.modernDescription')]
+
+
   ] as category, categoryIndex}
 
 <button
@@ -1027,12 +1052,12 @@ function changeVerse(direction) {
   on:click={() => (screen = "home")}
   style="font-size: 22px; padding: 14px 24px; display: block; margin: 0 auto 16px; border-radius: 12px; cursor: pointer;"
 >
-  🏠 Home
+  🏠 {translate(currentLanguage, 'navigation.home')}
 </button>
 
-  <button type="button" on:click={() => screen = "home"} style="font-size: 18px; padding: 12px 20px; margin-bottom: 20px; border-radius: 12px; cursor: pointer;">← Back</button>
-    <h1>The Four Gospels</h1>
-    <button type="button" on:click={() => screen = "chapters"} style="font-size: 20px; padding: 16px 32px; margin-top: 24px; border-radius: 12px; cursor: pointer;">📖 John →</button>
+  <button type="button" on:click={() => screen = "home"} style="font-size: 18px; padding: 12px 20px; margin-bottom: 20px; border-radius: 12px; cursor: pointer;">← {translate(currentLanguage, 'navigation.back')}</button>
+    <h1>{translate(currentLanguage, 'navigation.fourGospels')}</h1>
+    <button type="button" on:click={() => screen = "chapters"} style="font-size: 20px; padding: 16px 32px; margin-top: 24px; border-radius: 12px; cursor: pointer;">📖 {translate(currentLanguage, 'navigation.john')} →</button>
   </main>
   {:else if screen === "chapters"}
   <main style="max-width: 600px; margin: 40px auto; padding: 24px; text-align: center;">
@@ -1041,14 +1066,14 @@ function changeVerse(direction) {
   on:click={() => (screen = "home")}
   style="font-size: 22px; padding: 14px 24px; display: block; margin: 0 auto 16px; border-radius: 12px; cursor: pointer;"
 >
-  🏠 Home
+🏠 {translate(currentLanguage, 'navigation.home')}
 </button>
     <button
   type="button"
   on:click={() => (screen = "gospels")}
   style="font-size: 18px; padding: 12px 20px; margin-bottom: 20px; border-radius: 12px; cursor: pointer;"
 >
-  ← Back
+  ← {translate(currentLanguage, 'navigation.back')}
 </button>
 
 
@@ -1062,13 +1087,13 @@ function changeVerse(direction) {
       style="display: block; width: 100%; margin-top: 32px; padding: 20px; cursor: pointer;"
     >
       <div style="font-size: 14px; color: #666; margin-bottom: 6px;">
-     CHAPTER 1
+     {translate(currentLanguage, 'navigation.chapter')} 1
     </div>
     <div style="font-family: Georgia, serif; font-size: 26px; font-weight: bold;">
-     The Logos, Life and Light
+     {translate(currentLanguage, 'navigation.chapter1Title')}
      </div>
       <div style="font-size: 14px; color: #666; margin-top: 8px;">
-        Additional reference: John 1:1–5
+        {translate(currentLanguage, 'navigation.additionalReference')}: {translate(currentLanguage, 'navigation.john')} 1:1–5
       </div>
     </button>
     <button
@@ -1077,25 +1102,25 @@ function changeVerse(direction) {
   style="display: block; width: 100%; margin-top: 16px; padding: 20px; opacity: 0.55; cursor: not-allowed;"
 >
   <div style="font-size: 14px; color: #666; margin-bottom: 6px;">
-  CHAPTER 2
+  {translate(currentLanguage, 'navigation.chapter')} 2
 </div>
 <div style="font-family: Georgia, serif; font-size: 26px; font-weight: bold;">
-  The Witness
+  {translate(currentLanguage, 'navigation.chapter2Title')}
 </div>
   
   <div style="font-size: 14px; color: #666; margin-top: 8px;">
-    Additional reference: John 1:6–9
+    {translate(currentLanguage, 'navigation.additionalReference')}: {translate(currentLanguage, 'navigation.john')} 1:6–9
   </div>
   <div style="font-size: 12px; margin-top: 6px;">
-    Coming soon
+    {translate(currentLanguage, 'navigation.comingSoon')}
   </div>
 </button>
   </main>
 {:else}
   <!-- TITRE (cliquable) -->
 
-<button type="button" on:click={() => screen = "home"} style="font-size: 22px; padding: 14px 24px; border-radius: 12px; cursor: pointer; margin-left: 40px">🏠 Home</button>
-<button type="button" on:click={() => screen = "chapters"} style="font-size: 18px; padding: 12px 20px;display: block; margin-top: 12px; margin-left: 40px; border-radius: 12px; cursor: pointer;">← Back</button>
+<button type="button" on:click={() => screen = "home"} style="font-size: 22px; padding: 14px 24px; border-radius: 12px; cursor: pointer; margin-left: 40px">🏠 {translate(currentLanguage, 'navigation.home')}</button>
+<button type="button" on:click={() => screen = "chapters"} style="font-size: 18px; padding: 12px 20px;display: block; margin-top: 12px; margin-left: 40px; border-radius: 12px; cursor: pointer;">← {translate(currentLanguage, 'navigation.back')}</button>
 <div style="display: flex; align-items: center; justify-content: center; gap: 16px;">
   <button
     type="button"

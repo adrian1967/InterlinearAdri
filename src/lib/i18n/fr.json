@@ -1,0 +1,34 @@
+{
+  "language": "Français",
+  "navigation": {
+    "home": "Accueil",
+    "back": "Retour",
+    "continueReading": "Continuer la lecture",
+    "newTestament": "Le Nouveau Testament",
+    "newTestamentDescription": "Une œuvre centrale dans notre exploration",
+    "antiquity": "Antiquité",
+"antiquityDescription": "Homère, Platon, Aristote",
+"lateAntiquity": "Antiquité tardive et Moyen Âge",
+"lateAntiquityDescription": "Augustin, Thomas d'Aquin et autres auteurs",
+"renaissance": "Renaissance et époque moderne",
+"renaissanceDescription": "Humanisme, philosophie et sciences",
+"modern": "Époque moderne et contemporaine",
+"modernDescription": "Du XVIIIe au XXe siècle et au-delà",
+"subtitle": "À travers les textes originaux",
+"motto": "Découvrez les sources. Explorez les idées.",
+"newTestamentTitle": "Le Nouveau Testament",
+"fourGospels": "Les quatre Évangiles",
+"chapters": "Chapitres",
+"john": "Jean",
+"chapter": "CHAPITRE",
+"chapter1Title": "Le Logos, la vie et la lumière",
+"chapter2Title": "Le Témoignage",
+"additionalReference": "Référence complémentaire",
+"comingSoon": "Prochainement"
+  },
+  "manuscript": {
+    "title": "Manuscrit original",
+    "transcription": "Transcription diplomatique",
+    "notes": "Notes du manuscrit"
+  }
+}

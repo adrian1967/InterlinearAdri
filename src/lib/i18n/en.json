@@ -1,0 +1,34 @@
+{
+  "language": "English",
+  "navigation": {
+    "home": "Home",
+    "back": "Back",
+    "continueReading": "Continue Reading",
+    "newTestament": "The New Testament",
+    "newTestamentDescription": "A central work in our exploration",
+    "antiquity": "Antiquity",
+"antiquityDescription": "Homer, Plato, Aristotle",
+"lateAntiquity": "Late Antiquity & Middle Ages",
+"lateAntiquityDescription": "Augustine, Aquinas and other authors",
+"renaissance": "Renaissance & Early Modern",
+"renaissanceDescription": "Humanism, philosophy and science",
+"modern": "Modern & Contemporary",
+"modernDescription": "18th–20th centuries and beyond",
+"subtitle": "Through the Original Texts",
+"motto": "Discover the Sources. Explore the Ideas.",
+"newTestamentTitle": "The New Testament",
+"fourGospels": "The Four Gospels",
+"chapters": "Chapters",
+"john": "John",
+"chapter": "CHAPTER",
+"chapter1Title": "The Logos, Life and Light",
+"chapter2Title": "The Witness",
+"additionalReference": "Additional reference",
+"comingSoon": "Coming soon"
+  },
+  "manuscript": {
+    "title": "Original Manuscript",
+    "transcription": "Diplomatic Transcription",
+    "notes": "Manuscript Notes"
+  }
+}
