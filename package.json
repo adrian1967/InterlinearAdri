@@ -21,6 +21,8 @@
 	"dependencies": {
 		"@capacitor/android": "^8.3.1",
 		"@capacitor/cli": "^8.3.1",
-		"@capacitor/core": "^8.3.1"
+		"@capacitor/core": "^8.3.1",
+		"isomorphic-dompurify": "^4.7.0",
+		"marked": "^18.1.3"
 	}
 }

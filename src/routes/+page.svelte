@@ -50,15 +50,361 @@ function extractDiplomaticNotes(text) {
 }
 
   let showManuscriptNotes = false;
+  let comparisonMode = true;
+
+  let workspaceScrollPercent = 0;
+
+function getWorkspaceScroller() {
+  let element = document.getElementById('manuscript-workspace');
+
+  while (element) {
+    const style = window.getComputedStyle(element);
+
+    if (
+      element.scrollHeight > element.clientHeight + 2 &&
+      /(auto|scroll)/.test(style.overflowY)
+    ) {
+      return element;
+    }
+
+    element = element.parentElement;
+  }
+
+  return document.scrollingElement || document.documentElement;
+}
+
+function setWorkspaceScroll(percent) {
+  workspaceScrollPercent = Number(percent);
+
+  const scroller = getWorkspaceScroller();
+  const maximum = scroller.scrollHeight - scroller.clientHeight;
+
+  scroller.scrollTop = maximum * workspaceScrollPercent / 100;
+}
+
+function updateWorkspaceScroll() {
+  const scroller = getWorkspaceScroller();
+  const maximum = scroller.scrollHeight - scroller.clientHeight;
+
+  if (maximum <= 0) {
+    workspaceScrollPercent = 0;
+    return;
+  }
+
+  workspaceScrollPercent = Math.round(
+    (scroller.scrollTop / maximum) * 100
+  );
+}
+
+function handleWorkspaceScroll() {
+  updateWorkspaceScroll();
+}
+
+
+onMount(() => {
+  const scroller = getWorkspaceScroller();
+
+  scroller.addEventListener('scroll', handleWorkspaceScroll, {
+    passive: true
+  });
+
+  updateWorkspaceScroll();
+
+  return () => {
+    scroller.removeEventListener('scroll', handleWorkspaceScroll);
+  };
+});
+
+  let manuscriptX = 0;
+let manuscriptY = 0;
+
+let manuscriptZoom = 1;
+
+let transcriptionZoom = 1;
+
+function zoomTranscription(direction) {
+  transcriptionZoom = Math.max(
+    0.75,
+    Math.min(3, transcriptionZoom + direction * 0.25)
+  );
+}
+
+let transcriptionPointers = new Map();
+let transcriptionPinchDistance = 0;
+let transcriptionPinchZoom = 1;
+
+function getTranscriptionFingerDistance() {
+  const points = Array.from(transcriptionPointers.values());
+
+  if (points.length < 2) return 0;
+
+  return Math.hypot(
+    points[0].x - points[1].x,
+    points[0].y - points[1].y
+  );
+}
+
+function startTranscriptionTouch(event) {
+  if (!comparisonMode) return;
+
+  transcriptionPointers.set(event.pointerId, {
+    x: event.clientX,
+    y: event.clientY
+  });
+
+  if (transcriptionPointers.size === 2) {
+    transcriptionPinchDistance = getTranscriptionFingerDistance();
+    transcriptionPinchZoom = transcriptionZoom;
+  }
+}
+
+function moveTranscriptionTouch(event) {
+  if (!transcriptionPointers.has(event.pointerId)) return;
+
+  transcriptionPointers.set(event.pointerId, {
+    x: event.clientX,
+    y: event.clientY
+  });
+
+  if (
+    transcriptionPointers.size === 2 &&
+    transcriptionPinchDistance > 0
+  ) {
+    transcriptionZoom = Math.max(
+      0.75,
+      Math.min(
+        3,
+        transcriptionPinchZoom *
+          getTranscriptionFingerDistance() /
+          transcriptionPinchDistance
+      )
+    );
+  }
+}
+
+function stopTranscriptionTouch(event) {
+  transcriptionPointers.delete(event.pointerId);
+
+  if (transcriptionPointers.size < 2) {
+    transcriptionPinchDistance = 0;
+  }
+}
+
+let imageX = 0;
+let imageY = 0;
+
+let draggingImage = false;
+let imageDragStartX = 0;
+let imageDragStartY = 0;
+let imageStartX = 0;
+let imageStartY = 0;
+
+function zoomManuscript(direction) {
+  manuscriptZoom = Math.max(
+    1,
+    Math.min(8, manuscriptZoom + direction * 0.5)
+  );
+}
+
+function resetZooms() {
+  manuscriptZoom = 1;
+  transcriptionZoom = 1;
+
+  imageX = 0;
+  imageY = 0;
+
+  manuscriptX = 0;
+  manuscriptY = 0;
+
+  draggingImage = false;
+  draggingManuscript = false;
+
+  activeImagePointers.clear();
+  transcriptionPointers.clear();
+
+  pinchStartDistance = 0;
+  transcriptionPinchDistance = 0;
+}
+
+function resetManuscriptZoom() {
+  manuscriptZoom = 1;
+  imageX = 0;
+  imageY = 0;
+  manuscriptX = 0;
+  manuscriptY = 0;
+
+  draggingImage = false;
+  draggingManuscript = false;
+  activeImagePointers.clear();
+  pinchStartDistance = 0;
+}
+
+function resetTranscriptionZoom() {
+  transcriptionZoom = 1;
+  transcriptionPointers.clear();
+  transcriptionPinchDistance = 0;
+}
+
+function startImageDrag(event) {
+  if (!comparisonMode) return;
+
+  event.currentTarget.setPointerCapture(event.pointerId);
+
+  activeImagePointers.set(event.pointerId, {
+    x: event.clientX,
+    y: event.clientY
+  });
+
+  if (activeImagePointers.size === 1) {
+    draggingImage = true;
+    imageDragStartX = event.clientX;
+    imageDragStartY = event.clientY;
+    imageStartX = imageX;
+    imageStartY = imageY;
+  }
+
+  if (activeImagePointers.size === 2) {
+    draggingImage = false;
+
+    const points = Array.from(activeImagePointers.values());
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    pinchStartDistance = getFingerDistance();
+    pinchStartZoom = manuscriptZoom;
+
+    pinchStartX = (points[0].x + points[1].x) / 2 - rect.left;
+    pinchStartY = (points[0].y + points[1].y) / 2 - rect.top;
+
+    pinchImageX = imageX;
+    pinchImageY = imageY;
+  }
+}
+
+function moveImageDrag(event) {
+  if (!activeImagePointers.has(event.pointerId)) return;
+
+  activeImagePointers.set(event.pointerId, {
+    x: event.clientX,
+    y: event.clientY
+  });
+
+  if (activeImagePointers.size === 2 && pinchStartDistance > 0) {
+    const points = Array.from(activeImagePointers.values());
+    const rect = event.currentTarget.getBoundingClientRect();
+
+    const centerX = (points[0].x + points[1].x) / 2 - rect.left;
+    const centerY = (points[0].y + points[1].y) / 2 - rect.top;
+
+    manuscriptZoom = Math.max(
+      1,
+      Math.min(8, pinchStartZoom * getFingerDistance() / pinchStartDistance)
+    );
+
+    const ratio = manuscriptZoom / pinchStartZoom;
+
+    imageX = centerX - (pinchStartX - pinchImageX) * ratio;
+    imageY = centerY - (pinchStartY - pinchImageY) * ratio;
+
+    return;
+  }
+
+  if (draggingImage && manuscriptZoom > 1) {
+    imageX = imageStartX + event.clientX - imageDragStartX;
+    imageY = imageStartY + event.clientY - imageDragStartY;
+  }
+}
+
+function stopImageDrag(event) {
+  activeImagePointers.delete(event.pointerId);
+
+  draggingImage = false;
+
+  if (activeImagePointers.size === 1) {
+    const remaining = Array.from(activeImagePointers.values())[0];
+
+    imageDragStartX = remaining.x;
+    imageDragStartY = remaining.y;
+    imageStartX = imageX;
+    imageStartY = imageY;
+
+    draggingImage = true;
+  }
+
+  if (activeImagePointers.size === 0) {
+    pinchStartDistance = 0;
+  }
+}
+
+
+
+let activeImagePointers = new Map();
+let pinchStartDistance = 0;
+let pinchStartZoom = 1;
+
+let pinchStartX = 0;
+let pinchStartY = 0;
+let pinchImageX = 0;
+let pinchImageY = 0;
+
+function getFingerDistance() {
+  const points = Array.from(activeImagePointers.values());
+
+  if (points.length < 2) return 0;
+
+  const dx = points[0].x - points[1].x;
+  const dy = points[0].y - points[1].y;
+
+  return Math.hypot(dx, dy);
+}
+
+let draggingManuscript = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let manuscriptStartX = 0;
+let manuscriptStartY = 0;
+
+function startManuscriptDrag(event) {
+  if (!comparisonMode) return;
+
+  draggingManuscript = true;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+  manuscriptStartX = manuscriptX;
+  manuscriptStartY = manuscriptY;
+
+  event.currentTarget.setPointerCapture(event.pointerId);
+}
+
+function moveManuscriptDrag(event) {
+  if (!draggingManuscript) return;
+
+  manuscriptX = manuscriptStartX + event.clientX - dragStartX;
+  manuscriptY = manuscriptStartY + event.clientY - dragStartY;
+}
+
+function stopManuscriptDrag() {
+  draggingManuscript = false;
+}
+
   let currentBook = "John";
   let currentChapter = 1;
   let currentVerseNum = 1;
 
   import { translate } from '$lib/i18n';
+  import { marked } from 'marked';
+  import DOMPurify from 'isomorphic-dompurify';
+  function renderMarkdown(text) {
+  const html = marked.parse(text ?? '');
+  return DOMPurify.sanitize(html);
+}
   import { onMount } from "svelte";
   import diplomaticText from "$lib/manuscripts/john-column-001.md?raw";
   import interlinearText from "$lib/manuscripts/john-column-001-interlinear.md?raw";
   import conventionsText from "$lib/manuscripts/conventions.md?raw";
+  import diplomaticNotesEn from "$lib/manuscripts/john-column-001-notes-en.md?raw";
+  import diplomaticNotesFr from "$lib/manuscripts/john-column-001-notes-fr.md?raw";
+  import diplomaticNotesPt from "$lib/manuscripts/john-column-001-notes-pt.md?raw";
+
   let currentLanguage = 'fr';
   const languageOptions = [
   { code: 'en', name: 'English' },
@@ -1322,27 +1668,146 @@ function changeVerse(direction) {
 
       {#if selectedDocument.title === "Diplomatic Transcription"}
 
-    <div class="manuscript-workspace">
-       <div class="manuscript-panel">
+    
+  <div class="workspace-scroll-controls">
+    <input
+  type="range"
+  class="workspace-scroll-slider"
+  min="0"
+  max="100"
+  step="1"
+  value={workspaceScrollPercent}
+  on:input={(event) => setWorkspaceScroll(event.currentTarget.value)}
+  aria-label="Position verticale du lecteur"
+/>
+    <a href="#transcription-start" aria-label="Aller à la transcription">
+      ↓
+    </a>
+  </div>
+
+    <div
+  class="manuscript-workspace"
+  class:comparison-mode={comparisonMode}
+  id="manuscript-workspace"
+>
+      <div
+  class="manuscript-panel"
+  style:transform={comparisonMode ? `translate(${manuscriptX}px, ${manuscriptY}px)` : 'none'}
+  style:z-index={comparisonMode ? 10 : 'auto'}
+>
+
+      {#if comparisonMode}
+  <div
+    class="panel-handle"
+    role="button"
+    tabindex="0"
+    on:pointerdown={startManuscriptDrag}
+    on:pointermove={moveManuscriptDrag}
+    on:pointerup={stopManuscriptDrag}
+    on:pointercancel={stopManuscriptDrag}
+  >
+    ☰ Manuscript — Move
+  </div>
+{/if}
+
+{#if comparisonMode}
+  <div class="manuscript-zoom-controls">
+    <button type="button" on:click={() => zoomManuscript(-1)}>
+      −
+    </button>
+
+    <span>{Math.round(manuscriptZoom * 100)}%</span>
+
+    <button type="button" on:click={() => zoomManuscript(1)}>
+      +
+    </button>
+    {#if manuscriptZoom !== 1 || imageX !== 0 || imageY !== 0 || manuscriptX !== 0 || manuscriptY !== 0}
+  <button
+    type="button"
+    on:click={resetManuscriptZoom}
+    aria-label="Réinitialiser le zoom du manuscrit"
+    title="Reset Manuscript Zoom"
+  >
+    ↺
+  </button>
+{/if}
+  </div>
+{/if}
+
+
+<div
+  class="manuscript-viewport"
+  on:pointerdown={startImageDrag}
+  on:pointermove={moveImageDrag}
+  on:pointerup={stopImageDrag}
+  on:pointercancel={stopImageDrag}
+>
 
     <img
       src={vaticanus1353}
       alt="Codex Vaticanus — page complète, début de l'Évangile selon Jean dans la troisième colonne"
-      style="width: 100%; height: auto;"
+      style:width="100%"
+style:height="auto"
+
+style:transform={comparisonMode
+  ? `translate(${imageX}px, ${imageY}px) scale(${manuscriptZoom})`
+  : 'none'}
+
+style:transform-origin="top left"
     />
+</div>
+</div>
+
+
+<div class="transcription-panel" id="transcription-start">
+
+  {#if comparisonMode}
+  <div class="transcription-zoom-controls">
+    <button type="button" on:click={() => zoomTranscription(-1)}>−</button>
+    <span>{Math.round(transcriptionZoom * 100)}%</span>
+    <button type="button" on:click={() => zoomTranscription(1)}>+</button>
+    {#if transcriptionZoom !== 1}
+  <button
+    type="button"
+    on:click={resetTranscriptionZoom}
+    aria-label="Réinitialiser le zoom de la transcription"
+    title="Reset Transcription Zoom"
+  >
+    ↺
+  </button>
+{/if}
+  </div>
+{/if}
+
+  <div
+    class="transcription-viewport"
+    on:pointerdown={startTranscriptionTouch}
+    on:pointermove={moveTranscriptionTouch}
+    on:pointerup={stopTranscriptionTouch}
+    on:pointercancel={stopTranscriptionTouch}
+  >
+    <pre
+  style={`white-space: pre; overflow-wrap: normal; margin: 0; font-size: ${transcriptionZoom}em;`}
+>{selectedDocument.content}</pre>
+
+  </div>
 
 </div>
 
-<div class="transcription-panel">
-  <pre style="white-space: pre-wrap; overflow-wrap: anywhere; margin: 0;">{selectedDocument.content}</pre>
-</div>
 
 <div class="notes-panel">
   <h3>Manuscript Notes</h3>
 
-  <pre style="white-space: pre-wrap; overflow-wrap: anywhere; font-family: inherit;">
-    {extractDiplomaticNotes(diplomaticText)}
-  </pre>
+  <div class="notes-content">
+  {@html renderMarkdown(
+    currentLanguage === 'fr'
+      ? diplomaticNotesFr
+      : currentLanguage === 'pt'
+        ? diplomaticNotesPt
+        : diplomaticNotesEn
+  )}
+</div>
+
 </div>
 
 </div>
@@ -1619,6 +2084,231 @@ function changeVerse(direction) {
   max-height: 65vh;
   overflow: auto;
   box-sizing: border-box;
+}
+
+/* Great Books — Manuscript Notes */
+
+.notes-panel {
+  width: 100%;
+  min-width: 0;
+  max-height: 45vh;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+/* Great Books — présentation des notes du manuscrit */
+
+.notes-content {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: #222;
+  overflow-wrap: anywhere;
+}
+
+.notes-content :global(h1) {
+  font-size: 1.6rem;
+  margin: 0 0 1rem;
+}
+
+.notes-content :global(h2) {
+  font-size: 1.3rem;
+  margin: 1.5rem 0 0.75rem;
+}
+
+.notes-content :global(h3) {
+  font-size: 1.1rem;
+  margin: 1.2rem 0 0.5rem;
+}
+
+.notes-content :global(p) {
+  margin: 0.6rem 0;
+}
+
+/* Great Books — Comparison Mode */
+
+.manuscript-workspace.comparison-mode {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.manuscript-workspace.comparison-mode .manuscript-panel,
+.manuscript-workspace.comparison-mode .transcription-panel {
+  flex: 1 1 300px;
+  min-width: 0;
+}
+
+.manuscript-workspace.comparison-mode .notes-panel {
+  flex: 1 1 100%;
+}
+
+.panel-handle {
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  background: #e9e9e9;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.manuscript-zoom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.manuscript-zoom-controls button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f5f5f5;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Zone de visualisation du manuscrit */
+
+.manuscript-viewport {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  touch-action: none;
+}
+
+.comparison-mode .manuscript-viewport {
+  height: 60vh;
+}
+
+/* Commandes de zoom de la transcription */
+
+.transcription-zoom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.transcription-zoom-controls button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #f5f5f5;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Zoom tactile de la transcription diplomatique */
+
+.comparison-mode .transcription-viewport {
+  touch-action: pan-y;
+}
+
+/* Great Books — navigation intérieure de la transcription */
+
+.transcription-viewport {
+  width: 100%;
+  max-height: 60vh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.comparison-mode .transcription-viewport {
+  touch-action: pan-x pan-y;
+}
+
+/* Great Books — défilement horizontal de la transcription */
+
+.transcription-viewport {
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.comparison-mode .transcription-viewport {
+  touch-action: pan-x pan-y;
+}
+
+/* Great Books — navigation verticale */
+
+.workspace-scroll-controls {
+  position: fixed;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  padding: 8px 4px;
+  border-radius: 20px;
+  background: rgba(245, 245, 245, 0.9);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.workspace-scroll-controls a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: white;
+  color: #333;
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+/* Great Books — curseur vertical */
+
+.workspace-scroll-slider {
+  appearance: auto;
+  -webkit-appearance: auto;
+
+  writing-mode: vertical-lr;
+  direction: ltr;
+
+  width: 24px;
+  height: 240px;
+
+  margin: 0;
+  cursor: pointer;
+  accent-color: #777;
+  touch-action: none;
+}
+
+/* Great Books — commandes de zoom */
+
+.transcription-zoom-controls {
+  justify-content: flex-end;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+/* Garder les commandes de zoom libres de la barre verticale */
+
+.manuscript-zoom-controls,
+.transcription-zoom-controls {
+  padding-right: 65px;
+  box-sizing: border-box;
+  flex-wrap: wrap;
 }
 
 </style>
