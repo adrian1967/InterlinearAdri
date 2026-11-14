@@ -51,6 +51,7 @@ function extractDiplomaticNotes(text) {
 
   let showManuscriptNotes = false;
   let comparisonMode = true;
+  let showMarginalAnnotations = false;
 
   let workspaceScrollPercent = 0;
 
@@ -1761,6 +1762,30 @@ style:transform-origin="top left"
 
 <div class="transcription-panel" id="transcription-start">
 
+
+{#if showMarginalAnnotations}
+  <div class="marginal-annotations-panel">
+    <h3>Annotations marginales — Codex Vaticanus</h3>
+
+    <h4>Marge gauche</h4>
+
+    <p><strong>À hauteur des lignes 39–40 de la colonne II :</strong></p>
+
+<p class="marginal-greek">ΜΕΓΑΛΗC</p>
+
+<p><em>Annotation de la colonne voisine (Luc), et non de la colonne III (Jean).</em></p>
+
+    <h4>Marge droite</h4>
+
+<p><strong>À hauteur de la ligne 9 :</strong></p>
+<p class="marginal-greek">ΤωΝΑΝΘΡωΠωΝ</p>
+
+<p><strong>À hauteur des lignes 38–39 :</strong></p>
+<p class="marginal-greek">ΟΥΔΕΕΚΘΕΛΗΜΑ ΤΟCΑΝΔΡΟC</p>
+
+  </div>
+{/if}
+
   {#if comparisonMode}
   <div class="transcription-zoom-controls">
     <button type="button" on:click={() => zoomTranscription(-1)}>−</button>
@@ -1776,6 +1801,29 @@ style:transform-origin="top left"
     ↺
   </button>
 {/if}
+
+  <button
+
+    type="button"
+
+    class="marginal-annotations-button"
+
+    on:click={() => (showMarginalAnnotations = !showMarginalAnnotations)}
+
+    aria-label={showMarginalAnnotations
+
+      ? 'Masquer les annotations marginales'
+
+      : 'Afficher les annotations marginales'}
+
+    title="Annotations marginales"
+
+  >
+
+    {showMarginalAnnotations ? '✕ Marges' : '☷ Marges'}
+
+  </button>
+
   </div>
 {/if}
 
@@ -2079,12 +2127,17 @@ style:transform-origin="top left"
 /* Great Books — panneau de transcription diplomatique */
 
 .transcription-panel {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   min-width: 0;
+  height: 65vh;
   max-height: 65vh;
-  overflow: auto;
+  min-height: 0;
+  overflow: hidden;
   box-sizing: border-box;
 }
+
 
 /* Great Books — Manuscript Notes */
 
@@ -2190,37 +2243,27 @@ style:transform-origin="top left"
   height: 60vh;
 }
 
-/* Commandes de zoom de la transcription */
-
-.transcription-zoom-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
 .transcription-zoom-controls button {
-  padding: 8px 16px;
+  padding: 5px 8px;
+  min-width: 32px;
   border: 1px solid #ccc;
   border-radius: 8px;
   background: #f5f5f5;
-  font-size: 20px;
+  font-size: 15px;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
-/* Zoom tactile de la transcription diplomatique */
 
-.comparison-mode .transcription-viewport {
-  touch-action: pan-y;
-}
-
-/* Great Books — navigation intérieure de la transcription */
+/* Great Books — fenêtre intérieure de transcription diplomatique */
 
 .transcription-viewport {
   width: 100%;
-  max-height: 60vh;
-  overflow: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
@@ -2229,17 +2272,6 @@ style:transform-origin="top left"
   touch-action: pan-x pan-y;
 }
 
-/* Great Books — défilement horizontal de la transcription */
-
-.transcription-viewport {
-  overflow-x: auto;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-
-.comparison-mode .transcription-viewport {
-  touch-action: pan-x pan-y;
-}
 
 /* Great Books — navigation verticale */
 
@@ -2294,14 +2326,6 @@ style:transform-origin="top left"
   touch-action: none;
 }
 
-/* Great Books — commandes de zoom */
-
-.transcription-zoom-controls {
-  justify-content: flex-end;
-  margin-top: 0;
-  margin-bottom: 8px;
-}
-
 /* Garder les commandes de zoom libres de la barre verticale */
 
 .manuscript-zoom-controls,
@@ -2309,6 +2333,90 @@ style:transform-origin="top left"
   padding-right: 65px;
   box-sizing: border-box;
   flex-wrap: wrap;
+}
+
+/* Great Books — annotations marginales */
+
+.marginal-annotations-panel {
+  padding: 14px;
+  margin: 12px 0;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background: #faf9f6;
+  max-height: 25vh;
+  overflow: auto;
+}
+
+.marginal-annotations-panel h3 {
+  margin-top: 0;
+}
+
+.marginal-annotations-panel h4 {
+  margin-bottom: 6px;
+}
+
+/* Great Books — commandes compactes de transcription */
+
+.transcription-zoom-controls {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  padding-right: 48px;
+  margin-top: 0;
+  margin-bottom: 4px;
+  box-sizing: border-box;
+}
+
+.transcription-zoom-controls span {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.transcription-zoom-controls .marginal-annotations-button {
+  padding: 5px 7px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* Great Books — hauteur de lecture de la transcription */
+
+.comparison-mode .transcription-viewport {
+  height: 65vh;
+  max-height: none;
+  overflow: auto;
+}
+
+/* Great Books — espace pour la glissière sur téléphone */
+
+@media (max-width: 600px) {
+  .marginal-annotations-panel {
+    margin-right: 36px;
+  }
+}
+
+/* Great Books — alignement des trois panneaux sur téléphone */
+
+@media (max-width: 600px) {
+  .comparison-mode .transcription-viewport,
+  .comparison-mode .notes-panel {
+    margin-right: 36px;
+    min-width: 0;
+  }
+}
+
+/* Great Books — limiter la transcription avant la glissière */
+
+@media (max-width: 600px) {
+  .comparison-mode .transcription-viewport {
+    width: calc(100% - 36px);
+    max-width: calc(100% - 36px);
+    margin-right: 0;
+    box-sizing: border-box;
+    overflow-x: auto;
+    overflow-y: auto;
+  }
 }
 
 </style>
