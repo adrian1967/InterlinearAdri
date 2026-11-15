@@ -392,7 +392,7 @@ function stopManuscriptDrag() {
   let currentVerseNum = 1;
 
   import { translate } from '$lib/i18n';
-  import { lexicon } from '$lib/lexicon/greek-en.js';
+  import { getLexiconEntry } from '$lib/lexicon/index.js';
   import { marked } from 'marked';
   import DOMPurify from 'isomorphic-dompurify';
   function renderMarkdown(text) {
@@ -478,10 +478,11 @@ function normalizeWord(w) {
 
 function select(key) {
   selectedKey = (selectedKey === key) ? null : key;
-  selectedWord = selectedKey ? normalizeWord(lexicon[selectedKey]) : null;
+
+  selectedWord = selectedKey
+    ? normalizeWord(getLexiconEntry(selectedKey, currentLanguage))
+    : null;
 }
-
-
 
   function copyLexicon() {
     if (!selectedWord) return;
