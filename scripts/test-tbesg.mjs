@@ -195,3 +195,37 @@ console.log(
   JSON.stringify(jsonCompletRelu) ===
     JSON.stringify(entreesCompletes)
 );
+
+
+const { getTBESGEntries } = await import(
+  '../src/lib/lexicon/stepbible/tbesg.js'
+);
+
+const resultats2199 = getTBESGEntries(
+  jsonCompletRelu,
+  'G2199'
+);
+
+console.log('\n=== TEST DU MODULE TBESG ===');
+console.log('Entrées G2199 trouvées :', resultats2199.length);
+
+for (const entree of resultats2199) {
+  console.log(
+    entree.dStrong,
+    entree.grec || '[champ grec vide]',
+    entree.sensCourt
+  );
+}
+
+
+console.log('\n=== TEST DES TROIS MOTS ===');
+
+for (const numero of ['G3056', 'G0746', 'G1722']) {
+  const resultats = getTBESGEntries(jsonCompletRelu, numero);
+
+  console.log(
+    numero,
+    resultats.length,
+    resultats.map((entree) => entree.grec).join(', ')
+  );
+}

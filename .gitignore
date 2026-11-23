@@ -25,3 +25,4 @@ vite.config.ts.timestamp-*
 # Vaticanus photographs — private development only
 /src/lib/assets/vaticanus/
 /data-local/
+/static/lexicons/
