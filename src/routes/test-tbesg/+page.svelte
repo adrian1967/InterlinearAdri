@@ -2,6 +2,9 @@
 <script>
   import { onMount } from 'svelte';
   import { loadTBESG, getTBESGEntries } from '$lib/lexicon/stepbible/tbesg.js';
+  import { formatTBESG, formaterTypographieTBESG, formaterReferencesCompletesTBESG, preparerReferencesTBESG, formaterNotesTBESG, formaterReTBESG, formaterGreekTBESG, formaterAuthorTBESG, formaterDefTBESG } from '$lib/lexicon/stepbible/format-tbesg.js';
+  import DOMPurify from 'isomorphic-dompurify';
+
 
   let entrees = [];
   let erreur = '';
@@ -17,7 +20,27 @@
     }
   });
 
-  $: resultats = getTBESGEntries(entrees, 'G1722');
+  $: resultats = getTBESGEntries(entrees, 'G1277');
+
+
+$: definitionFormatee = formaterTypographieTBESG(
+  formaterDefTBESG(
+    formaterAuthorTBESG(
+      formaterGreekTBESG(
+        formaterReTBESG(
+          formaterNotesTBESG(
+            formaterReferencesCompletesTBESG(
+              formatTBESG(resultats[0]?.definitionOriginale)
+            )
+          )
+        )
+      )
+    )
+  )
+);
+
+
+
 </script>
 
 <h1>Great Books — Test TBESG</h1>
@@ -34,13 +57,13 @@
 
 <h2>Définition originale complète</h2>
 <p style="white-space: pre-wrap; overflow-wrap: anywhere;">
-  
 
-{resultats[0]?.definitionOriginale
-  ?.replace(/<BR\s*\/>/gi, '\n')
-  ?.replace(/<\/?b>/gi, '')
-  ?.replace(/<ref='[^']*'>(.*?)<\/ref>/gi, '$1')
-  ?.replace(/<\/?i>/gi, '') ?? '—'}
+
+{@html DOMPurify.sanitize(definitionFormatee, {
+  ALLOWED_TAGS: ['b', 'i'],
+  ALLOWED_ATTR: []
+})}
+
 
 </p>
 
