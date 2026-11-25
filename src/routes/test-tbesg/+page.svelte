@@ -50,7 +50,9 @@
 
 {@html DOMPurify.sanitize(definitionFormatee, {
   ALLOWED_TAGS: ['b', 'i'],
-  ALLOWED_ATTR: []
+  ALLOWED_ATTR: [],
+  ALLOW_DATA_ATTR: false,
+  ALLOW_ARIA_ATTR: false
 })}
 
 

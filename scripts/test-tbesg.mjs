@@ -1759,3 +1759,119 @@ console.log('\n=== CONTRÔLE DU TEXTE INTÉGRAL ===');
 
 console.log('Entrées contrôlées :', jsonCompletRelu.length);
 console.log('Différences textuelles :', differencesTexte162);
+
+
+const { default: DOMPurify167 } = await import(
+  'isomorphic-dompurify'
+);
+
+let differencesSecurite167 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const avant = formaterDefinitionCompleteTBESG(
+    entree.definitionOriginale
+  );
+
+  const apres = DOMPurify167.sanitize(avant);
+
+  if (avant !== apres) {
+    differencesSecurite167++;
+
+    if (differencesSecurite167 <= 5) {
+      console.log('\nDifférence :', entree.eStrong);
+      console.log('Avant :', JSON.stringify(avant));
+      console.log('Après :', JSON.stringify(apres));
+    }
+
+
+  }
+}
+
+console.log('\n=== CONTRÔLE GLOBAL DOMPURIFY ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Différences HTML :', differencesSecurite167);
+
+
+function normaliserHTML169(texte) {
+  return texte
+    .replace(/&#39;|&#x27;|&apos;/gi, "'")
+    .replace(/&quot;|&#34;/gi, '"');
+}
+
+let differencesNormalisees169 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const avant = formaterDefinitionCompleteTBESG(
+    entree.definitionOriginale
+  );
+
+  const apres = DOMPurify167.sanitize(avant);
+
+  if (
+    normaliserHTML169(avant) !==
+    normaliserHTML169(apres)
+  ) {
+    differencesNormalisees169++;
+    console.log('Différence restante :', entree.eStrong);
+  }
+}
+
+console.log('\n=== CONTRÔLE HTML NORMALISÉ ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Différences restantes :', differencesNormalisees169);
+
+
+let balisesInattendues170 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const resultat = DOMPurify167.sanitize(
+    formaterDefinitionCompleteTBESG(
+      entree.definitionOriginale
+    )
+  );
+
+  const balises = resultat.match(/<[^>]*>/g) || [];
+
+  for (const balise of balises) {
+    if (!/^<\/?[bi]>$/i.test(balise)) {
+      balisesInattendues170++;
+      console.log(entree.eStrong, balise);
+    }
+  }
+}
+
+console.log('\n=== CONTRÔLE DES BALISES HTML AUTORISÉES ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Balises inattendues :', balisesInattendues170);
+
+
+let differencesSecurite172 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const avant = formaterDefinitionCompleteTBESG(
+    entree.definitionOriginale
+  );
+
+  const apres = DOMPurify167.sanitize(avant, {
+    ALLOWED_TAGS: ['b', 'i'],
+    ALLOWED_ATTR: [],
+    ALLOW_DATA_ATTR: false,
+    ALLOW_ARIA_ATTR: false
+  });
+
+  if (
+    normaliserHTML169(avant) !==
+    normaliserHTML169(apres)
+  ) {
+    differencesSecurite172++;
+    console.log('Différence :', entree.eStrong);
+  }
+}
+
+console.log('\n=== CONTRÔLE SÉCURITÉ RENFORCÉE ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Différences restantes :', differencesSecurite172);
