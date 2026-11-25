@@ -148,3 +148,21 @@ export function formaterATBESG(texte) {
     (_, titre, contenu) => `${contenu} (${titre})`
   );
 }
+
+
+export function formaterDefinitionCompleteTBESG(texte) {
+  let resultat = formatTBESG(texte);
+
+  resultat = formaterReferencesCompletesTBESG(resultat);
+  resultat = formaterNotesTBESG(resultat);
+  resultat = formaterReTBESG(resultat);
+  resultat = formaterGreekTBESG(resultat);
+  resultat = formaterAuthorTBESG(resultat);
+  resultat = formaterDefTBESG(resultat);
+  resultat = formaterDateTBESG(resultat);
+  resultat = formaterCorrTBESG(resultat);
+  resultat = formaterATBESG(resultat);
+  resultat = formaterTypographieTBESG(resultat);
+
+  return resultat;
+}

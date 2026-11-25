@@ -1505,3 +1505,257 @@ console.log('Entrées contrôlées :', jsonCompletRelu.length);
 console.log('Balises originales :', balisesOriginales145);
 console.log('Balises restantes :', balisesRestantes145);
 console.log('Contenus modifiés :', contenusModifies145);
+
+
+const { formaterDefinitionCompleteTBESG } = await import(
+  '../src/lib/lexicon/stepbible/format-tbesg.js'
+);
+
+let definitionsVides151 = 0;
+let balisesRestantes151 = 0;
+let erreurs151 = 0;
+
+for (const entree of jsonCompletRelu) {
+  try {
+    const resultat = formaterDefinitionCompleteTBESG(
+      entree.definitionOriginale
+    );
+
+    if (!resultat.trim()) {
+      definitionsVides151++;
+    }
+
+    balisesRestantes151 +=
+      (resultat.match(
+        /(?:<|&lt;)\/?(?:br|lb|ref|re|note|greek|author|def|date|corr|a)\b/gi
+      ) || []).length;
+
+  } catch (erreur) {
+    erreurs151++;
+    console.log(entree.eStrong, erreur.message);
+  }
+}
+
+console.log('\n=== CONTRÔLE GLOBAL FORMATAGE COMPLET ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Définitions vides :', definitionsVides151);
+console.log('Balises restantes :', balisesRestantes151);
+console.log('Erreurs de formatage :', erreurs151);
+
+
+let differencesGrec157 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterDefinitionCompleteTBESG(original);
+
+  const grecOriginal = (
+    original.replace(/<[^>]*>/g, '')
+      .match(/\p{Script=Greek}/gu) || []
+  ).join('');
+
+  const grecFormate = (
+    resultat.match(/\p{Script=Greek}/gu) || []
+  ).join('');
+
+  if (grecOriginal !== grecFormate) {
+    differencesGrec157++;
+    console.log('Différence :', entree.eStrong);
+  }
+}
+
+console.log('\n=== CONTRÔLE CONSERVATION DU GREC ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Différences grecques :', differencesGrec157);
+
+
+let differencesDiacritiques158 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterDefinitionCompleteTBESG(original);
+
+  const diacritiquesOriginaux = (
+    original.replace(/<[^>]*>/g, '')
+      .match(/\p{M}/gu) || []
+  ).join('');
+
+  const diacritiquesFormates = (
+    resultat.match(/\p{M}/gu) || []
+  ).join('');
+
+  if (diacritiquesOriginaux !== diacritiquesFormates) {
+    differencesDiacritiques158++;
+    console.log('Différence :', entree.eStrong);
+  }
+}
+
+console.log('\n=== CONTRÔLE CONSERVATION DES DIACRITIQUES ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Différences diacritiques :', differencesDiacritiques158);
+
+
+let differencesHebreu159 = 0;
+let caracteresHebreux159 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterDefinitionCompleteTBESG(original);
+
+  const hebreuOriginal = (
+    original.replace(/<[^>]*>/g, '')
+      .match(/\p{Script=Hebrew}/gu) || []
+  ).join('');
+
+  const hebreuFormate = (
+    resultat.match(/\p{Script=Hebrew}/gu) || []
+  ).join('');
+
+  caracteresHebreux159 += hebreuOriginal.length;
+
+  if (hebreuOriginal !== hebreuFormate) {
+    differencesHebreu159++;
+    console.log('Différence :', entree.eStrong);
+  }
+}
+
+console.log('\n=== CONTRÔLE CONSERVATION DE L’HEBREU ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Caractères hébreux originaux :', caracteresHebreux159);
+console.log('Différences hébraïques :', differencesHebreu159);
+
+
+let differencesLettres160 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterDefinitionCompleteTBESG(original);
+
+  const texteOriginal = original
+    .replace(
+      /<a\b[^>]*title="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi,
+      '$2 ($1)'
+    )
+    .replace(/<[^>]*>/g, '');
+
+  const texteFormate = resultat
+    .replace(/<\/?[bi]>/gi, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+
+  const lettresOriginales = (
+    texteOriginal.match(/[\p{L}\p{M}]/gu) || []
+  ).join('');
+
+  const lettresFormatees = (
+    texteFormate.match(/[\p{L}\p{M}]/gu) || []
+  ).join('');
+
+  if (lettresOriginales !== lettresFormatees) {
+    differencesLettres160++;
+    console.log('Différence :', entree.eStrong);
+  }
+}
+
+console.log('\n=== CONTRÔLE CONSERVATION DES LETTRES ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Différences de lettres :', differencesLettres160);
+
+
+let differencesChiffres161 = 0;
+let chiffresOriginaux161 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterDefinitionCompleteTBESG(original);
+
+  const texteOriginal = original
+    .replace(
+      /<a\b[^>]*title="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi,
+      '$2 ($1)'
+    )
+    .replace(/<[^>]*>/g, '');
+
+  const texteFormate = resultat
+    .replace(/<\/?[bi]>/gi, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+
+  const chiffresOriginal = (
+    texteOriginal.match(/\p{N}/gu) || []
+  ).join('');
+
+  const chiffresFormate = (
+    texteFormate.match(/\p{N}/gu) || []
+  ).join('');
+
+  chiffresOriginaux161 += [...chiffresOriginal].length;
+
+  if (chiffresOriginal !== chiffresFormate) {
+    differencesChiffres161++;
+    console.log('Différence :', entree.eStrong);
+  }
+}
+
+console.log('\n=== CONTRÔLE CONSERVATION DES CHIFFRES ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Caractères numériques originaux :', chiffresOriginaux161);
+console.log('Différences numériques :', differencesChiffres161);
+
+
+let differencesTexte162 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterDefinitionCompleteTBESG(original);
+
+  const attendu = original
+    .replace(/<br\s*\/?>|<lb\s*\/?>/gi, '\n')
+    .replace(/<note>/gi, ' [')
+    .replace(/<\/note>/gi, '] ')
+    .replace(/<corr>/gi, '[')
+    .replace(/<\/corr>/gi, ']')
+
+    .replace(/(\p{L})<author>(?=\p{L})/giu, '$1 ')
+    .replace(
+      /<a\b[^>]*title="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi,
+      '$2 ($1)'
+    )
+    .replace(/<[^>]*>/g, '');
+
+  const obtenu = resultat
+    .replace(/<\/?[bi]>/gi, '')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;|&#x27;|&apos;/g, "'")
+    .replace(/&amp;/g, '&');
+
+  if (attendu !== obtenu) {
+    differencesTexte162++;
+
+    console.log('\nDifférence :', entree.eStrong);
+    console.log('Original :', JSON.stringify(original));
+    console.log('Attendu :', JSON.stringify(attendu));
+    console.log('Obtenu :', JSON.stringify(obtenu));
+
+
+  }
+}
+
+console.log('\n=== CONTRÔLE DU TEXTE INTÉGRAL ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Différences textuelles :', differencesTexte162);
