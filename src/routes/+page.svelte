@@ -5,7 +5,49 @@
 
 import vaticanus1353 from '$lib/assets/vaticanus/Vaticanus_1353.jpg';
 
+import { loadTBESG, getTBESGEntries } from '$lib/lexicon/stepbible/tbesg.js';
+
+import { formaterDefinitionCompleteTBESG } from '$lib/lexicon/stepbible/format-tbesg.js';
+
+
   let selectedWord = null;
+
+let tbesgEntrees = [];
+let tbesgChargement = false;
+let tbesgErreur = '';
+
+let dictionnaireActif = 'strong';
+
+$: tbesgResultats = selectedWord?.strong
+  ? getTBESGEntries(tbesgEntrees, selectedWord.strong)
+  : [];
+
+function selectionnerDictionnaire(dictionnaire) {
+  dictionnaireActif = dictionnaire;
+
+  if (dictionnaire === 'tbesg') {
+    chargerDictionnaireTBESG();
+  }
+}
+
+
+
+async function chargerDictionnaireTBESG() {
+  if (tbesgEntrees.length > 0 || tbesgChargement) return;
+
+  tbesgChargement = true;
+  tbesgErreur = '';
+
+  try {
+    tbesgEntrees = await loadTBESG();
+  } catch (erreur) {
+    tbesgErreur = erreur.message;
+  } finally {
+    tbesgChargement = false;
+  }
+}
+
+
   let screen = "home"; // "home" | "gospels" | "chapters" | "read"
   let selectedDocument = null;
   const documents = [
@@ -399,6 +441,21 @@ function stopManuscriptDrag() {
   const html = marked.parse(text ?? '');
   return DOMPurify.sanitize(html);
 }
+
+
+function afficherDefinitionTBESG(texte) {
+  return DOMPurify.sanitize(
+    formaterDefinitionCompleteTBESG(texte),
+    {
+      ALLOWED_TAGS: ['b', 'i'],
+      ALLOWED_ATTR: [],
+      ALLOW_DATA_ATTR: false,
+      ALLOW_ARIA_ATTR: false
+    }
+  );
+}
+
+
   import { onMount } from "svelte";
   import diplomaticText from "$lib/manuscripts/john-column-001.md?raw";
   import interlinearText from "$lib/manuscripts/john-column-001-interlinear.md?raw";
@@ -1179,6 +1236,28 @@ function changeVerse(direction) {
         </p>
       </div>
 
+
+<div class="lexicon-tabs">
+  <button
+    type="button"
+    aria-pressed={dictionnaireActif === 'strong'}
+    on:click={() => selectionnerDictionnaire('strong')}
+  >
+    Strong's
+  </button>
+
+  <button
+    type="button"
+    aria-pressed={dictionnaireActif === 'tbesg'}
+    on:click={() => selectionnerDictionnaire('tbesg')}
+  >
+    TBESG
+  </button>
+</div>
+
+
+{#if dictionnaireActif === 'strong'}
+
       <p><b>Transliteration:</b> {selectedWord.transliteration}</p>
       <p><b>Part of Speech:</b> {selectedWord.partOfSpeech}</p>
       <p><b>Phonetic Spelling:</b> {selectedWord.phonetic}</p>
@@ -1190,6 +1269,37 @@ function changeVerse(direction) {
       <p><b>Usage:</b><br />{selectedWord.usage}</p>
 
       <p><b>Translated as (count):</b><br />{selectedWord.translatedAs}</p>
+      
+{/if}
+
+{#if dictionnaireActif === 'tbesg'}
+  <h3>STEPBible — TBESG</h3>
+
+  {#if tbesgChargement}
+    <p>Loading dictionary...</p>
+  {:else if tbesgErreur}
+    <p>{tbesgErreur}</p>
+  {:else if tbesgResultats.length === 0}
+    <p>No entry found.</p>
+  {:else}
+    <p>Entries found: {tbesgResultats.length}</p>
+
+    {#each tbesgResultats as entree}
+      <p><b>{entree.grec}</b></p>
+      <p>{entree.translitteration}</p>
+      <p>{entree.sensCourt}</p>
+
+<hr />
+
+<p style="white-space: pre-wrap; overflow-wrap: anywhere;">
+  {@html afficherDefinitionTBESG(entree.definitionOriginale)}
+</p>
+
+    {/each}
+  {/if}
+{/if}
+
+
     </div>
   </div>
 {/if}
