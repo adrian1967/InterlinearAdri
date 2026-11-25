@@ -24,7 +24,13 @@
     }
   });
 
-  $: resultats = getTBESGEntries(entrees, 'G6164');
+  $: resultats = getTBESGEntries(entrees, 'G0025');
+
+
+  $: referencesPreparees = preparerReferencesTBESG(
+    resultats[0]?.definitionOriginale
+  );
+
 
   $: definitionFormatee = formaterDefinitionCompleteTBESG(
     resultats[0]?.definitionOriginale
@@ -43,6 +49,21 @@
   <p>Mot grec : {resultats[0]?.grec ?? 'Introuvable'}</p>
   <p>Translittération : {resultats[0]?.translitteration ?? '—'}</p>
   <p>Sens court : {resultats[0]?.sensCourt ?? '—'}</p>
+
+
+<p>Références bibliques : {referencesPreparees.length}</p>
+
+<details>
+  <summary>Liste des références bibliques</summary>
+
+  <ol>
+    {#each referencesPreparees as reference}
+      <li>
+        {reference.texte} — {reference.identifiant}
+      </li>
+    {/each}
+  </ol>
+</details>
 
 <h2>Définition originale complète</h2>
 <p style="white-space: pre-wrap; overflow-wrap: anywhere;">

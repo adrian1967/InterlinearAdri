@@ -252,6 +252,257 @@ for (const [numero, nombreAttendu] of referencesTests) {
 }
 
 
+// Test des références imbriquées
+
+const { extraireReferencesCompletesTBESG } = await import(
+  '../src/lib/lexicon/stepbible/format-tbesg.js'
+);
+
+const exempleImbrique =
+  "<ref='2Ti.4.8, 10'>II <ref='Tim.4.8'>Tim 4:8</ref>, 10</ref>";
+
+const referencesImbriquees =
+  extraireReferencesCompletesTBESG(exempleImbrique);
+
+assert.deepEqual(referencesImbriquees, [
+  {
+    identifiant: '2Ti.4.8, 10',
+    texte: 'II Tim 4:8, 10'
+  },
+  {
+    identifiant: 'Tim.4.8',
+    texte: 'Tim 4:8'
+  }
+]);
+
+console.log('\n=== RÉFÉRENCES IMBRIQUÉES ===');
+console.log('Références extraites :', referencesImbriquees.length);
+console.log('Identifiants et textes conservés : OK');
+
+
+
+// Contrôle global des références bibliques
+
+let referencesOriginales = 0;
+let referencesExtraites = 0;
+
+for (const entree of entrees) {
+  const original = entree.definitionOriginale;
+
+  const identifiantsOriginaux = [
+    ...original.matchAll(/<ref='([^']*)'>/gi)
+  ].map(balise => balise[1]);
+
+  const references =
+    extraireReferencesCompletesTBESG(original);
+
+  referencesOriginales += identifiantsOriginaux.length;
+  referencesExtraites += references.length;
+
+  assert.deepEqual(
+    references.map(reference => reference.identifiant),
+    identifiantsOriginaux,
+    `Différence de références : ${entree.eStrong}`
+  );
+}
+
+assert.equal(referencesOriginales, 41479);
+assert.equal(referencesExtraites, referencesOriginales);
+
+console.log('\n=== CONTRÔLE GLOBAL DES RÉFÉRENCES ===');
+console.log('Entrées contrôlées :', entrees.length);
+console.log('Références originales :', referencesOriginales);
+console.log('Références extraites :', referencesExtraites);
+console.log('Conservation des identifiants : OK');
+
+
+// Contrôle du contenu des références
+
+let contenusControles = 0;
+
+for (const entree of entrees) {
+  const references = extraireReferencesCompletesTBESG(
+    entree.definitionOriginale
+  );
+
+  for (const reference of references) {
+    assert.ok(
+      reference.texte.trim().length > 0,
+      `Référence vide : ${entree.eStrong} ${reference.identifiant}`
+    );
+
+    assert.ok(
+      !/<\/?ref\b/i.test(reference.texte),
+      `Balise restante : ${entree.eStrong} ${reference.identifiant}`
+    );
+
+    contenusControles++;
+  }
+}
+
+assert.equal(contenusControles, 41479);
+
+console.log('\n=== CONTENU DES RÉFÉRENCES ===');
+console.log('Références contrôlées :', contenusControles);
+console.log('Contenus non vides : OK');
+console.log('Absence de balises ref : OK');
+
+
+// Compatibilité des fonctions d'extraction
+
+let entreesCompatibles196 = 0;
+let entreesParticulieres196 = 0;
+
+for (const entree of entrees) {
+  const original = entree.definitionOriginale;
+
+  const anciennes = extraireReferencesTBESG(original);
+  const nouvelles = extraireReferencesCompletesTBESG(original);
+
+  if (JSON.stringify(anciennes) === JSON.stringify(nouvelles)) {
+    entreesCompatibles196++;
+  } else {
+    entreesParticulieres196++;
+    console.log('Cas particulier :', entree.eStrong);
+  }
+}
+
+console.log('\n=== COMPATIBILITÉ DES EXTRACTIONS ===');
+console.log('Entrées contrôlées :', entrees.length);
+console.log('Résultats identiques :', entreesCompatibles196);
+console.log('Résultats différents :', entreesParticulieres196);
+
+
+// Validation des six cas particuliers
+
+const casParticuliers197 = entrees
+  .filter(entree =>
+    JSON.stringify(
+      extraireReferencesTBESG(entree.definitionOriginale)
+    ) !== JSON.stringify(
+      extraireReferencesCompletesTBESG(entree.definitionOriginale)
+    )
+  )
+  .map(entree => entree.dStrong)
+
+  .sort();
+
+console.log('\n=== VALIDATION DES CAS PARTICULIERS ===');
+
+console.log('Identifiants :', casParticuliers197);
+console.log('Nombre de cas :', casParticuliers197.length);
+
+assert.equal(casParticuliers197.length, 6);
+
+
+assert.deepEqual(casParticuliers197, [
+  'G0025 =',
+  'G3873 =',
+  'G4413G =',
+  'G4413H = a Meaning of',
+  'G4413I = a Meaning of',
+  'G4413J = a Meaning of'
+]);
+
+console.log('Identifiants détaillés : OK');
+
+
+console.log('Nombre de cas particuliers : OK');
+
+
+
+// Validation des autres références imbriquées
+
+assert.deepEqual(
+  extraireReferencesCompletesTBESG(
+    "<ref='Bel.1.14, 2,3'>Dan LXX <ref='Bel.1.14'>Bel 1:14</ref>, 2,3</ref>"
+  ),
+  [
+    {
+      identifiant: 'Bel.1.14, 2,3',
+      texte: 'Dan LXX Bel 1:14, 2,3'
+    },
+    {
+      identifiant: 'Bel.1.14',
+      texte: 'Bel 1:14'
+    }
+  ]
+);
+
+assert.deepEqual(
+  extraireReferencesCompletesTBESG(
+    "<ref='Jhn.8.7; 20.4, 8'>Jhn.8:[<ref='7].20.4'>7] 20:4</ref>, 8</ref>"
+  ),
+  [
+    {
+      identifiant: 'Jhn.8.7; 20.4, 8',
+      texte: 'Jhn.8:[7] 20:4, 8'
+    },
+    {
+      identifiant: '7].20.4',
+      texte: '7] 20:4'
+    }
+  ]
+);
+
+console.log('\n=== VALIDATION DES RÉFÉRENCES IMBRIQUÉES ===');
+console.log('Structure G3873 : OK');
+console.log('Structure G4413 : OK');
+
+
+// Validation de la fermeture orpheline
+
+assert.deepEqual(
+  extraireReferencesCompletesTBESG(
+    "<ref='Jhn.9.1ff; 10.21, 11:37ff'>Jhn.9:1ff; 10.21, 11:37</ref>ff</ref>"
+  ),
+  [
+    {
+      identifiant: 'Jhn.9.1ff; 10.21, 11:37ff',
+      texte: 'Jhn.9:1ff; 10.21, 11:37'
+    }
+  ]
+);
+
+console.log('\n=== FERMETURE ORPHELINE ===');
+console.log('Structure G0455 : OK');
+
+
+// Validation de la préparation des références
+
+const { preparerReferencesTBESG } = await import(
+  '../src/lib/lexicon/stepbible/format-tbesg.js'
+);
+
+let referencesPreparees203 = 0;
+
+for (const entree of entrees) {
+  const original = entree.definitionOriginale;
+
+  const references = extraireReferencesCompletesTBESG(original);
+  const preparees = preparerReferencesTBESG(original);
+
+  assert.deepEqual(
+    preparees,
+    references.map(reference => ({
+      identifiant: reference.identifiant,
+      texte: reference.texte,
+      cliquable: false
+    })),
+    `Préparation incorrecte : ${entree.dStrong}`
+  );
+
+  referencesPreparees203 += preparees.length;
+}
+
+assert.equal(referencesPreparees203, 41479);
+
+console.log('\n=== PRÉPARATION DES RÉFÉRENCES ===');
+console.log('Références préparées :', referencesPreparees203);
+console.log('Identifiants et contenus conservés : OK');
+console.log('Navigation désactivée : OK');
+
+
 // 8. Bilan final
 
 console.log('\n========================================');

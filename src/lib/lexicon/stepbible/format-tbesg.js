@@ -67,7 +67,8 @@ export function extraireReferencesTBESG(texte) {
 
 
 export function preparerReferencesTBESG(texte) {
-  return extraireReferencesTBESG(texte).map((reference) => ({
+
+  return extraireReferencesCompletesTBESG(texte).map((reference) => ({
     identifiant: reference.identifiant,
     texte: reference.texte,
     cliquable: false
@@ -165,4 +166,38 @@ export function formaterDefinitionCompleteTBESG(texte) {
   resultat = formaterTypographieTBESG(resultat);
 
   return resultat;
+}
+
+
+export function extraireReferencesCompletesTBESG(texte) {
+  if (typeof texte !== 'string') return [];
+
+  const references = [];
+  const pile = [];
+
+  const balises = /<ref='([^']*)'>|<\/ref\s*>/gi;
+
+  for (const balise of texte.matchAll(balises)) {
+    if (balise[1] !== undefined) {
+      const reference = {
+        identifiant: balise[1],
+        texte: ''
+      };
+
+      references.push(reference);
+
+      pile.push({
+        reference,
+        debut: balise.index + balise[0].length
+      });
+    } else if (pile.length > 0) {
+      const { reference, debut } = pile.pop();
+
+      reference.texte = texte
+        .slice(debut, balise.index)
+        .replace(/<ref='[^']*'>|<\/ref\s*>/gi, '');
+    }
+  }
+
+  return references;
 }
