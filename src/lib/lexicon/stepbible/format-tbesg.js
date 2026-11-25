@@ -8,8 +8,8 @@ export function formatTBESG(texte) {
   if (typeof texte !== 'string') return '';
 
   return texte
-    .replace(/<BR\s*\/>/gi, '\n')
-    .replace(/<lb\s*\/>/gi, '\n');
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<lb\s*\/?>/gi, '\n');
 }
 
 
@@ -110,7 +110,9 @@ export function formaterGreekTBESG(texte) {
 export function formaterAuthorTBESG(texte) {
   if (typeof texte !== 'string') return '';
 
-  return texte.replace(/<\/?author>/gi, '');
+  return texte
+    .replace(/(\p{L})<author>(?=\p{L})/giu, '$1 ')
+    .replace(/<\/?author>/gi, '');
 }
 
 
@@ -118,4 +120,31 @@ export function formaterDefTBESG(texte) {
   if (typeof texte !== 'string') return '';
 
   return texte.replace(/<\/?def>/gi, '');
+}
+
+
+export function formaterDateTBESG(texte) {
+  if (typeof texte !== 'string') return '';
+
+  return texte.replace(/<\/?date>/gi, '');
+}
+
+
+export function formaterCorrTBESG(texte) {
+  if (typeof texte !== 'string') return '';
+
+  return texte.replace(
+    /<corr>([\s\S]*?)<\/corr>/gi,
+    (_, contenu) => `[${contenu}]`
+  );
+}
+
+
+export function formaterATBESG(texte) {
+  if (typeof texte !== 'string') return '';
+
+  return texte.replace(
+    /<a href="javascript:void\(0\)" title="([^"]+)">([\s\S]*?)<\/a>/gi,
+    (_, titre, contenu) => `${contenu} (${titre})`
+  );
 }

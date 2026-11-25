@@ -2,8 +2,11 @@
 <script>
   import { onMount } from 'svelte';
   import { loadTBESG, getTBESGEntries } from '$lib/lexicon/stepbible/tbesg.js';
-  import { formatTBESG, formaterTypographieTBESG, formaterReferencesCompletesTBESG, preparerReferencesTBESG, formaterNotesTBESG, formaterReTBESG, formaterGreekTBESG, formaterAuthorTBESG, formaterDefTBESG } from '$lib/lexicon/stepbible/format-tbesg.js';
+  import { formatTBESG, formaterTypographieTBESG, formaterReferencesCompletesTBESG, preparerReferencesTBESG, formaterNotesTBESG, formaterReTBESG, formaterGreekTBESG, formaterAuthorTBESG, formaterDefTBESG, formaterDateTBESG } from '$lib/lexicon/stepbible/format-tbesg.js';
   import DOMPurify from 'isomorphic-dompurify';
+  import { formaterCorrTBESG } from '$lib/lexicon/stepbible/format-tbesg.js';
+  import { formaterATBESG } from '$lib/lexicon/stepbible/format-tbesg.js';
+
 
 
   let entrees = [];
@@ -20,25 +23,29 @@
     }
   });
 
-  $: resultats = getTBESGEntries(entrees, 'G1277');
+  $: resultats = getTBESGEntries(entrees, 'G6164');
 
-
-$: definitionFormatee = formaterTypographieTBESG(
-  formaterDefTBESG(
-    formaterAuthorTBESG(
-      formaterGreekTBESG(
-        formaterReTBESG(
-          formaterNotesTBESG(
-            formaterReferencesCompletesTBESG(
-              formatTBESG(resultats[0]?.definitionOriginale)
+  $: definitionFormatee = formaterTypographieTBESG(
+    formaterATBESG(
+      formaterCorrTBESG(
+        formaterDateTBESG(
+          formaterDefTBESG(
+            formaterAuthorTBESG(
+              formaterGreekTBESG(
+                formaterReTBESG(
+                  formaterNotesTBESG(
+                    formaterReferencesCompletesTBESG(
+                      formatTBESG(resultats[0]?.definitionOriginale)
+                    )
+                  )
+                )
+              )
             )
           )
         )
       )
     )
-  )
-);
-
+  );
 
 
 </script>

@@ -1128,9 +1128,11 @@ for (const entree of jsonCompletRelu) {
   balisesRestantes113 +=
     (resultat.match(/<\/?author\b[^>]*>/gi) || []).length;
 
-  const attendu = original
-    .split(/<\/?author>/gi)
-    .join('');
+const attendu = original
+  .replace(/(\p{L})<author>(?=\p{L})/giu, '$1 ')
+  .split(/<\/?author>/gi)
+  .join('');
+
 
   if (resultat !== attendu) {
     contenusModifies113++;
@@ -1178,3 +1180,328 @@ console.log('Entrées contrôlées :', jsonCompletRelu.length);
 console.log('Balises originales :', balisesOriginales117);
 console.log('Balises restantes :', balisesRestantes117);
 console.log('Contenus modifiés :', contenusModifies117);
+
+
+const { formaterDateTBESG } = await import(
+  '../src/lib/lexicon/stepbible/format-tbesg.js'
+);
+
+let balisesOriginales121 = 0;
+let balisesRestantes121 = 0;
+let contenusModifies121 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterDateTBESG(original);
+
+  balisesOriginales121 +=
+    (original.match(/<\/?date\b[^>]*>/gi) || []).length;
+
+  balisesRestantes121 +=
+    (resultat.match(/<\/?date\b[^>]*>/gi) || []).length;
+
+  const attendu = original
+    .split(/<\/?date>/gi)
+    .join('');
+
+
+
+  if (resultat !== attendu) {
+    contenusModifies121++;
+  }
+}
+
+console.log('\n=== CONTRÔLE GLOBAL DES BALISES DATE ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Balises originales :', balisesOriginales121);
+console.log('Balises restantes :', balisesRestantes121);
+console.log('Contenus modifiés :', contenusModifies121);
+
+
+console.log('\n=== TEST DES VARIANTES BR ET LB ===');
+
+const variantes125 = [
+  '<BR />',
+  '<BR>',
+  '<br />',
+  '<br>',
+  '<lb />',
+  '<lb>'
+];
+
+for (const balise of variantes125) {
+  const original = `λόγος${balise}ἀρχή`;
+
+  console.log(
+    balise,
+    formatTBESG(original) === 'λόγος\nἀρχή'
+  );
+}
+
+
+console.log('\n=== DÉFINITION ORIGINALE G4513 ===');
+
+const entree127 = getTBESGEntries(
+  jsonCompletRelu,
+  'G4513'
+)[0];
+
+console.log(entree127.definitionOriginale);
+
+
+let espacesManquants128 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const texte = entree.definitionOriginale;
+
+  for (const resultat of texte.matchAll(
+    /\p{L}<author>\p{L}/giu
+  )) {
+    espacesManquants128++;
+  }
+}
+
+console.log('\n=== ESPACEMENT DES BALISES AUTHOR ===');
+
+console.log(
+  'Cas détectés :',
+  espacesManquants128
+);
+
+
+console.log('\n=== EXEMPLES ESPACEMENT AUTHOR ===');
+
+let exemples129 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const texte = entree.definitionOriginale;
+
+  for (const resultat of texte.matchAll(
+    /\p{L}<author>\p{L}/giu
+  )) {
+    if (exemples129 >= 10) break;
+
+    console.log(
+      entree.dStrong,
+      texte.slice(
+        Math.max(0, resultat.index - 40),
+        resultat.index + 80
+      )
+    );
+
+    exemples129++;
+  }
+
+  if (exemples129 >= 10) break;
+}
+
+
+console.log('\n=== TEST ESPACEMENT AUTHOR ===');
+
+console.log(
+  'Espace manquant ajouté :',
+  formaterAuthorTBESG(
+    'dates<author>Anthology Palantina</author>'
+  ) === 'dates Anthology Palantina'
+);
+
+console.log(
+  'Espace existant conservé :',
+  formaterAuthorTBESG(
+    'dates <author>Anthology Palantina</author>'
+  ) === 'dates Anthology Palantina'
+);
+
+console.log(
+  'Ponctuation conservée :',
+  formaterAuthorTBESG(
+    '(<author>Thuc.</author>)'
+  ) === '(Thuc.)'
+);
+
+
+let espacesAjoutes134 = 0;
+let autresDifferences134 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+
+  const sansBalises = original
+    .replace(/<\/?author>/gi, '');
+
+  const resultat = formaterAuthorTBESG(original);
+
+  espacesAjoutes134 +=
+    resultat.length - sansBalises.length;
+
+  if (
+    resultat.replace(/ /g, '') !==
+    sansBalises.replace(/ /g, '')
+  ) {
+    autresDifferences134++;
+  }
+}
+
+console.log('\n=== CONTRÔLE GLOBAL ESPACEMENT AUTHOR ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Espaces ajoutés :', espacesAjoutes134);
+console.log('Autres différences :', autresDifferences134);
+
+
+console.log('\n=== EXAMEN DES BALISES CORR ===');
+
+for (const entree of jsonCompletRelu) {
+  if (/<\/?corr\b/i.test(entree.definitionOriginale)) {
+    console.log('Identifiant :', entree.eStrong);
+    console.log('Grec :', entree.grec);
+    console.log('Définition :', entree.definitionOriginale);
+  }
+}
+
+
+const { formaterCorrTBESG } = await import(
+  '../src/lib/lexicon/stepbible/format-tbesg.js'
+);
+
+console.log('\n=== TEST FORMATAGE CORR ===');
+
+console.log(
+  'Correction conservée :',
+  formaterCorrTBESG('<corr>ἀγάπῃ</corr>') === '[ἀγάπῃ]'
+);
+
+console.log(
+  'Texte environnant conservé :',
+  formaterCorrTBESG('abc <corr>ἀγάπῃ</corr> xyz') ===
+  'abc [ἀγάπῃ] xyz'
+);
+
+console.log(
+  'Texte sans balise inchangé :',
+  formaterCorrTBESG('ἀγάπῃ') === 'ἀγάπῃ'
+);
+
+
+let balisesOriginales138 = 0;
+let balisesRestantes138 = 0;
+let contenusModifies138 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterCorrTBESG(original);
+
+  balisesOriginales138 +=
+    (original.match(/<\/?corr\b[^>]*>/gi) || []).length;
+
+  balisesRestantes138 +=
+    (resultat.match(/<\/?corr\b[^>]*>/gi) || []).length;
+
+  const attendu = original
+    .replace(/<corr>/gi, '[')
+    .replace(/<\/corr>/gi, ']');
+
+  if (resultat !== attendu) {
+    contenusModifies138++;
+  }
+}
+
+console.log('\n=== CONTRÔLE GLOBAL DES BALISES CORR ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Balises originales :', balisesOriginales138);
+console.log('Balises restantes :', balisesRestantes138);
+console.log('Contenus modifiés :', contenusModifies138);
+
+
+console.log('\n=== EXAMEN DES BALISES A ===');
+
+for (const entree of jsonCompletRelu) {
+  const correspondances =
+    entree.definitionOriginale.match(/<a\b[^>]*>[\s\S]*?<\/a>/gi) || [];
+
+  for (const correspondance of correspondances) {
+    console.log(entree.eStrong, ':', correspondance);
+  }
+}
+
+
+let ouvertures142 = 0;
+let fermetures142 = 0;
+let structureReconnue142 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+
+  ouvertures142 +=
+    (original.match(/<a\b[^>]*>/gi) || []).length;
+
+  fermetures142 +=
+    (original.match(/<\/a>/gi) || []).length;
+
+  structureReconnue142 +=
+    (original.match(/<a href="javascript:void\(0\)" title="[^"]+">[\s\S]*?<\/a>/gi) || []).length;
+}
+
+console.log('\n=== CONTRÔLE STRUCTURE DES BALISES A ===');
+
+console.log('Balises ouvrantes :', ouvertures142);
+console.log('Balises fermantes :', fermetures142);
+console.log('Structures reconnues :', structureReconnue142);
+
+
+const { formaterATBESG } = await import(
+  '../src/lib/lexicon/stepbible/format-tbesg.js'
+);
+
+console.log('\n=== TEST FORMATAGE A ===');
+
+console.log(
+  'Auteur et date conservés :',
+  formaterATBESG('<a href="javascript:void(0)" title="Aristotle Philosopher">Refs 4th c.BC</a>') ===
+  'Refs 4th c.BC (Aristotle Philosopher)'
+);
+
+console.log(
+  'Oeuvre et date conservées :',
+  formaterATBESG('<a href="javascript:void(0)" title="Iliad by Homer">8th/7th c.BC</a>') ===
+  '8th/7th c.BC (Iliad by Homer)'
+);
+
+console.log(
+  'Texte sans balise inchangé :',
+  formaterATBESG('λόγος') === 'λόγος'
+);
+
+
+let balisesOriginales145 = 0;
+let balisesRestantes145 = 0;
+let contenusModifies145 = 0;
+
+for (const entree of jsonCompletRelu) {
+  const original = entree.definitionOriginale;
+  const resultat = formaterATBESG(original);
+
+  balisesOriginales145 +=
+    (original.match(/<\/?a\b[^>]*>/gi) || []).length;
+
+  balisesRestantes145 +=
+    (resultat.match(/<\/?a\b[^>]*>/gi) || []).length;
+
+  const attendu = original.replace(
+    /<a href="javascript:void\(0\)" title="([^"]+)">([\s\S]*?)<\/a>/gi,
+    '$2 ($1)'
+  );
+
+  if (resultat !== attendu) {
+    contenusModifies145++;
+  }
+}
+
+console.log('\n=== CONTRÔLE GLOBAL DES BALISES A ===');
+
+console.log('Entrées contrôlées :', jsonCompletRelu.length);
+console.log('Balises originales :', balisesOriginales145);
+console.log('Balises restantes :', balisesRestantes145);
+console.log('Contenus modifiés :', contenusModifies145);
