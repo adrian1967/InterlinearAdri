@@ -1238,6 +1238,9 @@ function changeVerse(direction) {
 
 
 <div class="lexicon-tabs">
+
+<h3>Lexical Resources</h3>
+
   <button
     type="button"
     aria-pressed={dictionnaireActif === 'strong'}
@@ -1254,6 +1257,17 @@ function changeVerse(direction) {
     TBESG
   </button>
 </div>
+
+
+<p class="lexicon-source-description">
+  {#if dictionnaireActif === 'strong'}
+    Biblical lexicon by James Strong (1890).
+  {:else if dictionnaireActif === 'tbesg'}
+    Biblical Greek lexicon by STEPBible
+    (<b>T</b>ranslators <b>B</b>rief lexicon of
+    <b>E</b>xtended <b>S</b>trongs for <b>G</b>reek).
+  {/if}
+</p>
 
 
 {#if dictionnaireActif === 'strong'}
@@ -1285,9 +1299,11 @@ function changeVerse(direction) {
     <p>Entries found: {tbesgResultats.length}</p>
 
     {#each tbesgResultats as entree}
-      <p><b>{entree.grec}</b></p>
-      <p>{entree.translitteration}</p>
-      <p>{entree.sensCourt}</p>
+
+      <p><b>Lexical form:</b> {entree.grec}</p>
+      <p><b>Transliteration:</b> {entree.translitteration}</p>
+      <p><b>Short definition:</b> {entree.sensCourt}</p>
+
 
 <hr />
 
@@ -1660,6 +1676,41 @@ style:transform-origin="top left"
     padding: 18px 18px 22px;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
   }
+
+
+.lexicon-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0 16px;
+}
+
+.lexicon-tabs button {
+  padding: 10px 18px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #eeeeee;
+  color: #333333;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.lexicon-tabs button[aria-pressed="true"] {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+
+.lexicon-card .lexicon-source-description {
+  color: #2563eb;
+  font-size: 11px;
+  font-style: italic;
+  line-height: 1.4;
+  margin: -10px 0 14px 160px;
+}
+
 
   .lexicon-actions {
     display: flex;
